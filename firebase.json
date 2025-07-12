@@ -5,6 +5,21 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+    "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port":8085
+    },
+    "auth": {
+      "port": 9099
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  },
   "functions": [
     {
       "source": "functions",
