@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/hifalutin/hodous-tools#readme",
   "dependencies": {
+    "axios": "^1.10.0",
+    "dotenv": "^17.2.0",
     "n": "^10.2.0",
     "stable": "^0.1.8"
   }
