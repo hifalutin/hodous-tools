@@ -1,0 +1,45 @@
+---
+const response = await fetch(
+  'http://127.0.0.1:5001/hodous-tools/us-central1/getZohoProjects'
+);
+
+let projects = [];
+
+if (response.ok) {
+  const json = await response.json();
+  projects = json.data?.projects || [];
+} else {
+  console.error('Failed to load projects');
+}
+---
+
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <title>Projects</title>
+  </head>
+  <body class='bg-gray-100 text-gray-900 p-8'>
+    <h1 class='text-3xl font-bold mb-6'>Projects</h1>
+
+    {
+      projects.length > 0 ? (
+        <ul class='space-y-4'>
+          {projects.map((project) => (
+            <li class='bg-white p-4 rounded shadow'>
+              <h2 class='text-xl font-semibold'>{project.project_name}</h2>
+              <p class='text-sm text-gray-600'>
+                Customer: {project.customer_name}
+              </p>
+              <p class='text-sm text-gray-600'>Status: {project.status}</p>
+              <p class='text-sm text-gray-600'>
+                Billing: {project.billing_type}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No projects found or failed to fetch.</p>
+      )
+    }
+  </body>
+</html>

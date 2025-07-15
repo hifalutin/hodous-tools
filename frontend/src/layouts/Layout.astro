@@ -1,0 +1,18 @@
+---
+import '../styles/tailwind.css';
+import Sidebar from '../components/Sidebar.astro';
+---
+
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Dashboard</title>
+  </head>
+  <body class='flex min-h-screen bg-gray-100 text-gray-900'>
+    <Sidebar />
+    <main class='flex-1 p-6'>
+      <slot />
+    </main>
+  </body>
+</html>

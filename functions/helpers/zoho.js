@@ -1,11 +1,15 @@
-const axios = require('axios');
-require('dotenv').config();
+// helpers/zoho.js
+
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const client_id = process.env.ZOHO_CLIENT_ID;
 const client_secret = process.env.ZOHO_CLIENT_SECRET;
 const refresh_token = process.env.ZOHO_REFRESH_TOKEN;
 
-const getFreshAccessToken = async () => {
+export const getFreshAccessToken = async () => {
   const res = await axios.post(
     'https://accounts.zoho.com/oauth/v2/token',
     new URLSearchParams({
@@ -25,7 +29,7 @@ const getFreshAccessToken = async () => {
 };
 
 // ⛑ Error handler wrapper
-const handleZohoRequestWithRetry = async (requestFn) => {
+export const handleZohoRequestWithRetry = async (requestFn) => {
   try {
     return await requestFn();
   } catch (error) {
@@ -35,9 +39,4 @@ const handleZohoRequestWithRetry = async (requestFn) => {
     }
     throw error;
   }
-};
-
-module.exports = {
-  getFreshAccessToken,
-  handleZohoRequestWithRetry,
 };
