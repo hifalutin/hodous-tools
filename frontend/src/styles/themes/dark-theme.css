@@ -1,0 +1,26 @@
+/* src/styles/theme.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .sidebar-theme {
+    @apply w-64 bg-gray-900 text-gray-100 shadow-lg p-4 space-y-4 border-r border-gray-700;
+  }
+
+  .sidebar-heading {
+    @apply text-xl font-semibold;
+  }
+
+  .sidebar-link {
+    @apply block text-gray-300 hover:underline;
+  }
+
+  .sidebar-link-active {
+    @apply text-blue-400;
+  }
+
+  .dark-theme-bg {
+    @apply bg-black;
+  }
+}

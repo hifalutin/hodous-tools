@@ -1,16 +1,90 @@
-<nav class='w-64 bg-white shadow-lg p-4 space-y-4'>
-  <h2 class='text-xl font-semibold'>Hodous Tools</h2>
-  <ul class='space-y-2'>
+<nav
+  class='min-w-[16rem] max-w-[16rem] bg-neutral-950 text-gray-100 shadow-lg p-4 space-y-4 border-r border-gray-700 fixed top-0 left-0 h-screen overflow-y-auto z-40'
+>
+  <div class='bg-neutral-950 flex flex-col items-center justify-start'>
+    <img
+      src='/img/Hodous-Logo.png'
+      alt='Hodous Tools Logo'
+      class='h-16 bg-neutral-950 p-0'
+    />
+    <div
+      class='mt-2 mb-1 px-2 py-1 border border-gray-800 text-white text-base font-medium tracking-wide'
+    >
+      Tools
+    </div>
+  </div>
+  <hr class='border-t border-gray-800' />
+  <ul class='space-y-4'>
     <li>
-      <a href='/' class='block text-blue-600 hover:underline'>Dashboard</a>
+      <a
+        href='/'
+        class='flex items-center px-3 py-2 rounded text-white text-lg font-semibold hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-700 transition-colors'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          class='w-6 h-6 text-orange-400 mr-4'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            stroke-width='2'
+            d='M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z'
+          ></path>
+        </svg>
+        Dashboard
+      </a>
     </li>
+
+    <hr class='border-t border-gray-800' />
+
     <li>
-      <a href='/projects' class='block text-gray-700 hover:underline'
-        >Projects</a>
+      <a
+        href='/projects'
+        class='flex items-center px-3 py-2 rounded text-white text-lg font-semibold hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-700 transition-colors'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          class='w-6 h-6 text-orange-400 mr-4'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            stroke-width='2'
+            d='M3 4h18v16H3V4zm2 4h14M9 8v8M15 8v4'></path>
+        </svg>
+        Projects
+      </a>
     </li>
+
+    <hr class='border-t border-gray-800' />
+
     <li>
-      <a href='/invoices' class='block text-gray-700 hover:underline'
-        >Invoices</a>
+      <a
+        href='/invoices'
+        class='flex items-center px-3 py-2 rounded text-white text-lg font-semibold hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-700 transition-colors'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          class='w-6 h-6 text-orange-400 mr-4'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            stroke-width='2'
+            d='M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm4 4h6M7 10h10M7 14h10M7 18h6'
+          ></path>
+        </svg>
+        Invoices
+      </a>
     </li>
   </ul>
 </nav>

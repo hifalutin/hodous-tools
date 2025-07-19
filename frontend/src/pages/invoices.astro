@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getZohoInvoices } from '../lib/getZohoInvoices';
+import PageHeader from '../components/PageHeader.astro';
+
+let invoices = [];
+let isTestData = false;
+
+try {
+  const result = await getZohoInvoices();
+  invoices = result?.data?.data?.invoices || [];
+  isTestData = result?.isTestData ?? false;
+} catch (error) {
+  console.error('Error fetching invoices from Zoho:', error);
+  invoices = [];
+}
+---
+
+<Layout>
+  <div class='bg-neutral-900 px-6 py-4'>
+    <PageHeader>Header</PageHeader>
+    <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
+  </div>
+  <div class='min-h-screen px-0'>
+    <div class='overflow-auto overflow-x-auto max-h-[calc(100vh-96px)] px-0'>
+      <table
+        class='min-w-full table-auto bg-neutral-900 divide-y divide-gray-800 text-sm text-left'
+      >
+        <thead class='bg-neutral-800 text-gray-100 text-left text-sm'>
+          <tr>
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+            >
+              <input type='checkbox' class='form-checkbox text-blue-600' />
+            </th>
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Invoice#</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Customer Name</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Date</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Invoice Status</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Due Date</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Invoice Amount</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Balance</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              >Order Number</th
+            >
+            <th
+              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
+              >Actions</th
+            >
+          </tr>
+        </thead>
+        <tbody class='text-sm text-gray-100'>
+          {
+            invoices.slice(0, 20).map((invoice) => (
+              <tr class='border-t border-gray-700 hover:bg-blue-700 transition-colors duration-200 cursor-pointer'>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                  <input
+                    type='checkbox'
+                    class='form-checkbox text-blue-600 row-checkbox'
+                  />
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline'>
+                  {invoice.invoice_number}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                  {invoice.cf_customer_name}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                  {invoice.date || '—'}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-green-400'>
+                  {invoice.status}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                  {invoice.due_date}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-right text-gray-200'>
+                  ${Number(invoice.total || 0).toFixed(2)}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-right text-gray-200'>
+                  ${Number(invoice.balance || 0).toFixed(2)}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                  {invoice.reference_number || '—'}
+                </td>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center'>
+                  <div class='relative inline-block text-left'>
+                    <button
+                      class='text-gray-400 hover:text-white focus:outline-none'
+                      aria-label='Open actions'
+                    >
+                      &#8942;
+                    </button>
+                    <div class='hidden absolute right-0 mt-2 w-36 rounded-md bg-neutral-700 shadow-lg z-10 text-sm text-white border border-gray-600 dropdown-menu'>
+                      <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
+                        Download PDF
+                      </button>
+                      <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
+                        Print
+                      </button>
+                      <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
+                        Email
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function toggleSelectAll(masterCheckbox) {
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach((cb) => {
+        cb.checked = masterCheckbox.checked;
+      });
+    }
+
+    // Attach event listener after DOM content loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const masterCheckbox = document.querySelector(
+        'thead input[type="checkbox"]'
+      );
+      if (masterCheckbox) {
+        masterCheckbox.addEventListener('change', function () {
+          toggleSelectAll(this);
+        });
+      }
+    });
+  </script>
+</Layout>

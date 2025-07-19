@@ -1,45 +1,413 @@
 ---
-const response = await fetch(
-  'http://127.0.0.1:5001/hodous-tools/us-central1/getZohoProjects'
-);
-
+import Layout from '../layouts/Layout.astro'; // adjust path if needed
+import PageHeader from '../components/PageHeader.astro';
+import { getZohoProjects } from '../lib/getZohoProjects';
+// ...existing code...
 let projects = [];
+let isTestData = false;
 
-if (response.ok) {
-  const json = await response.json();
-  projects = json.data?.projects || [];
-} else {
-  console.error('Failed to load projects');
+try {
+  const result = await getZohoProjects();
+  projects = result?.data?.data?.projects || [];
+  isTestData = result?.isTestData ?? false;
+  console.log('Zoho project response:', result);
+} catch (error) {
+  console.error('Error fetching projects from Zoho:', error);
+  projects = [];
 }
 ---
 
-<html lang='en'>
-  <head>
-    <meta charset='UTF-8' />
-    <title>Projects</title>
-  </head>
-  <body class='bg-gray-100 text-gray-900 p-8'>
-    <h1 class='text-3xl font-bold mb-6'>Projects</h1>
+<Layout>
 
+    <div class='bg-neutral-900 px-6 py-4'>
+
+    <PageHeader>Header</PageHeader>
+      <h1 class='text-3xl font-bold mb-2'>Projects</h1>
+ 
+  
+  </div>
+    <div class="min-h-screen px-0 font-sans">
     {
       projects.length > 0 ? (
-        <ul class='space-y-4'>
-          {projects.map((project) => (
-            <li class='bg-white p-4 rounded shadow'>
-              <h2 class='text-xl font-semibold'>{project.project_name}</h2>
-              <p class='text-sm text-gray-600'>
-                Customer: {project.customer_name}
-              </p>
-              <p class='text-sm text-gray-600'>Status: {project.status}</p>
-              <p class='text-sm text-gray-600'>
-                Billing: {project.billing_type}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No projects found or failed to fetch.</p>
-      )
+        <div class='overflow-auto max-h-[calc(100vh-96px)] px-0'>
+          <table class='table-fixed min-w-full bg-neutral-900 divide-y divide-gray-800 text-sm text-left'>
+              <thead class='bg-neutral-800 text-gray-100 text-left text-sm'>
+                <tr>
+                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>
+                    <input type='checkbox' class='form-checkbox text-blue-600' />
+                  </th>
+                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>Project Name</th>
+                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>Billing Method</th>
+                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>Rate</th>
+                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {projects.slice(0, 10).map((project) => (
+                  <tr
+                    class='border-t border-gray-700 hover:bg-blue-800 transition-colors duration-200 cursor-pointer'
+                    data-project-id={project.project_id}
+                  >
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                      <input type='checkbox' class='form-checkbox text-blue-600 row-checkbox' />
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>{project.project_name}</td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                      {project.billing_type
+                        .replaceAll('_', ' ')
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                      ${project.rate?.toFixed(2) || '0.00'}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-right'>
+                      <div class="flex justify-center">
+                        <div class="relative inline-block text-left">
+                          <button
+                            type="button"
+                            class="text-gray-400 hover:text-white focus:outline-none"
+                            aria-haspopup="true"
+                            aria-expanded="true"
+                            data-dropdown-toggle
+                          >
+                            &#8942;
+                          </button>
+                          <div class="hidden absolute right-0 w-28 bg-neutral-700 rounded-md shadow-lg z-10 text-sm text-white border border-gray-600 dropdown-menu transition-all duration-300 transform scale-95 opacity-0 origin-top-right">
+                            <button
+                              class="block w-full text-left px-4 py-2 hover:bg-neutral-600 delete-btn flex items-center space-x-2 cursor-pointer hover:text-orange-400"
+                              data-project-id={project.project_id}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M9 6v12m6-12v12M4 6l1 14a2 2 0 002 2h10a2 2 0 002-2l1-14" />
+                              </svg>
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {isTestData && (
+                <tfoot>
+                  <tr>
+                    <td
+                      colspan='5'
+                      class='bg-orange-800 text-center text-white px-4 py-2 italic'
+                    >
+                      Note: Showing test data
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+            <script type="module">
+              document.addEventListener('click', (e) => {
+                const isToggle = e.target.matches('[data-dropdown-toggle]');
+                const dropdowns = document.querySelectorAll('.dropdown-menu');
+                const rows = document.querySelectorAll('tbody tr');
+
+                if (isToggle) {
+                  dropdowns.forEach(menu => menu.classList.add('hidden'));
+                  rows.forEach(row => row.classList.remove('bg-orange-900'));
+
+                  const dropdown = e.target.nextElementSibling;
+                  if (dropdown && dropdown.classList.contains('dropdown-menu')) {
+                    const isHidden = dropdown.classList.contains('hidden');
+                    if (isHidden) {
+                      dropdown.classList.remove('hidden');
+                      requestAnimationFrame(() => {
+                        dropdown.classList.remove('scale-95', 'opacity-0');
+                        dropdown.classList.add('scale-100', 'opacity-100');
+                      });
+                    } else {
+                      dropdown.classList.add('scale-95', 'opacity-0');
+                      setTimeout(() => dropdown.classList.add('hidden'), 300);
+                    }
+                    const row = e.target.closest('tr');
+                    if (row) {
+                      row.classList.add('bg-orange-900');
+
+                      const rows = Array.from(document.querySelectorAll('tbody tr'));
+                      const isLastRow = row === rows[rows.length - 1];
+
+                      if (isLastRow) {
+                        dropdown.classList.remove('mt-2');
+                        dropdown.classList.add('bottom-full', 'mb-2');
+                      } else {
+                        dropdown.classList.add('mt-2');
+                        dropdown.classList.remove('bottom-full', 'mb-2');
+                      }
+                    }
+                  }
+                } else {
+                  dropdowns.forEach(menu => menu.classList.add('hidden'));
+                  rows.forEach(row => row.classList.remove('bg-orange-900'));
+                }
+              });
+            </script>
+          </div>
+        ) : null
     }
-  </body>
-</html>
+    {
+      projects.length === 0 ? (
+        <p class="mt-8 text-center">No projects found or failed to fetch.</p>
+      ) : null
+    }
+
+    <!-- Expandable Add Project Form -->
+    <div
+      id="addProjectWrapper"
+      class="hidden fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md bg-neutral-800 p-6 rounded-lg shadow-lg border border-gray-700 animate-in"
+      style="overflow:visible; max-height:none; left: calc(50% + 112px); transform: translateX(-50%);"
+    >
+      <button id="closeFormBtn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+      <h2 class='text-xl font-semibold mb-4'>Add New Project</h2>
+      <div
+        id='statusMessage'
+        class='hidden mb-4 p-3 rounded text-white transition-opacity duration-500 opacity-0'
+      ></div>
+      <form id='addProjectForm' class='space-y-4'>
+        <div>
+          <label class='block text-sm font-medium mb-1' for='newProjectName'>Project Name</label>
+          <input type='text' id='newProjectName' class='p-2 border border-gray-600 rounded w-full bg-neutral-700 text-white' required />
+        </div>
+        <div>
+          <label class='block text-sm font-medium mb-1' for='newRate'>Rate</label>
+          <input type='number' id='newRate' class='p-2 border border-gray-600 rounded w-full bg-neutral-700 text-white' required />
+        </div>
+        <div>
+          <label class='block text-sm font-medium mb-1' for='newBilling'>Billing Type</label>
+          <select id='newBilling' class='p-2 border border-gray-600 rounded w-full bg-neutral-700 text-white' required>
+            <option value='fixed_cost_for_project'>Fixed Cost for Project</option>
+            <option value='time_and_materials'>Time and Materials</option>
+            <option value='milestone_billing'>Milestone Billing</option>
+          </select>
+        </div>
+        <button type='submit' class='bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 w-full'>Add Project</button>
+      </form>
+    </div>
+    <button id="toggleFormBtn" class="fixed bottom-8 z-50 bg-orange-600 hover:bg-orange-700 text-white rounded-full w-20 h-20 text-4xl flex items-center justify-center shadow-lg" style="left: calc(50% + 112px); transform: translateX(-50%);">
+      <span class="mb-1">+</span>
+    </button>
+  </div>
+
+  <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-neutral-800 text-white p-6 rounded-lg shadow-lg border border-gray-600 w-96">
+      <h3 class="text-lg font-semibold mb-4">Confirm Deletion</h3>
+      <p class="mb-6">Are you sure you want to delete this project?</p>
+      <div class="flex justify-end space-x-4">
+        <button id="cancelDelete" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded">Cancel</button>
+        <button id="confirmDelete" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Delete</button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script type='module'>
+  const form = document.getElementById('addProjectForm');
+  const statusMessage = document.getElementById('statusMessage');
+
+  function showStatusMessage(message, success = true) {
+    statusMessage.textContent = message;
+    statusMessage.classList.remove('hidden', 'opacity-0');
+    statusMessage.classList.toggle('bg-green-600', success);
+    statusMessage.classList.toggle('bg-red-600', !success);
+    statusMessage.style.opacity = '1';
+    setTimeout(() => {
+      statusMessage.style.opacity = '0';
+      setTimeout(() => {
+        statusMessage.classList.add('hidden');
+      }, 500);
+    }, 3000);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const projectName = document.getElementById('newProjectName').value.trim();
+    const rate = parseFloat(document.getElementById('newRate').value);
+    const billingType = document.getElementById('newBilling').value;
+
+    console.log('Submitting project:', { projectName, rate, billingType });
+
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5001/hodous-tools/us-central1/createZohoProject',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            project_name: projectName,
+            rate,
+            billing_type: billingType,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      showStatusMessage('Project created successfully!', true);
+      form.reset();
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to add project:', error);
+      showStatusMessage(
+        'Failed to add project. Please try again later.',
+        false
+      );
+    }
+  });
+
+  let selectedProjectId = null;
+
+  const modal = document.getElementById('deleteModal');
+  const cancelBtn = document.getElementById('cancelDelete');
+  const confirmBtn = document.getElementById('confirmDelete');
+
+  document.addEventListener('click', async (event) => {
+    // Find the closest ancestor with .delete-btn (handles clicks on children like svg or span)
+    const deleteBtn = event.target.closest('.delete-btn');
+    if (deleteBtn) {
+      selectedProjectId = deleteBtn.dataset.projectId;
+      modal.classList.remove('hidden');
+    }
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    selectedProjectId = null;
+  });
+
+  confirmBtn.addEventListener('click', async () => {
+    if (!selectedProjectId) return;
+
+    const targetRow = document.querySelector(`tr[data-project-id="${selectedProjectId}"]`);
+    if (targetRow) {
+      targetRow.classList.add('bg-red-800', 'duration-300');
+    }
+
+    try {
+      const response = await fetch(
+        'http://127.0.0.1:5001/hodous-tools/us-central1/deleteZohoProject',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ project_id: selectedProjectId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      showStatusMessage('Project deleted successfully!', true);
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      showStatusMessage(
+        'Failed to delete project. Please try again later.',
+        false
+      );
+    } finally {
+      modal.classList.add('hidden');
+      selectedProjectId = null;
+      if (targetRow) {
+        targetRow.classList.remove('animate-pulse');
+      }
+    }
+  });
+
+  const toggleFormBtn = document.getElementById('toggleFormBtn');
+  const formWrapper = document.getElementById('addProjectWrapper');
+  // Add close button logic
+  const closeFormBtn = document.getElementById('closeFormBtn');
+  closeFormBtn?.addEventListener('click', () => {
+    formWrapper.classList.remove('animate-in');
+    formWrapper.classList.add('animate-out');
+    setTimeout(() => {
+      formWrapper.classList.add('hidden');
+      formWrapper.classList.remove('animate-out');
+    }, 400);
+  });
+  toggleFormBtn?.addEventListener('click', () => {
+    const isHidden = formWrapper.classList.contains('hidden');
+    if (isHidden) {
+      formWrapper.classList.remove('hidden', 'animate-out');
+      void formWrapper.offsetWidth;
+      formWrapper.classList.add('animate-in');
+    } else {
+      formWrapper.classList.remove('animate-in');
+      formWrapper.classList.add('animate-out');
+      setTimeout(() => {
+        formWrapper.classList.add('hidden');
+        formWrapper.classList.remove('animate-out');
+      }, 400); // Match animation duration
+    }
+  });
+
+  // Hide add project form when clicking outside of it or the toggle button
+  document.addEventListener('click', (event) => {
+    const isClickInsideForm =
+      formWrapper.contains(event.target) ||
+      toggleFormBtn.contains(event.target);
+    if (
+      !isClickInsideForm &&
+      !formWrapper.classList.contains('hidden')
+    ) {
+      formWrapper.classList.remove('animate-in');
+      formWrapper.classList.add('animate-out');
+      setTimeout(() => {
+        formWrapper.classList.add('hidden');
+        formWrapper.classList.remove('animate-out');
+      }, 400); // Match animation duration
+    }
+  });
+</script>
+
+<style>
+.dropdown-menu.scale-100 {
+  transform: scale(1);
+  opacity: 1;
+}
+
+#addProjectWrapper {
+  left: calc(50% + 112px); /* Adjust this value if your sidebar width changes */
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 32rem;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translate(-50%, 40%);
+  }
+  100% {
+    transform: translate(-50%, 0%);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translate(-50%, 0%);
+  }
+  100% {
+    transform: translate(-50%, 100%);
+  }
+}
+
+#addProjectWrapper.animate-in {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+#addProjectWrapper.animate-out {
+  animation: slideDown 0.4s ease-in forwards;
+}
+</style>
