@@ -11,10 +11,15 @@ import Sidebar from '../components/Sidebar.astro';
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>Dashboard</title>
   </head>
-  <body class="bg-black">
-    <div id="content-container" class="transition-transform duration-300 ease-in-out translate-x-0">
-      <header class="sm:hidden flex items-center justify-between px-6 py-4 bg-black border-b border-gray-800 h-20">
-        <div class="flex-1 flex justify-start">
+  <body class='bg-black'>
+    <div
+      id='content-container'
+      class='transition-transform duration-700 ease-in-out translate-x-0 brightness-100'
+    >
+      <header
+        class='sm:hidden flex items-center justify-between px-6 py-4 bg-black border-b border-gray-800 h-20'
+      >
+        <div class='flex-1 flex justify-start'>
           <img
             src='/img/Hodous-Logo.png'
             alt='Hodous Tools Logo'
@@ -22,32 +27,46 @@ import Sidebar from '../components/Sidebar.astro';
           />
         </div>
         <button
-          id="sidebar-toggle"
-          type="button"
-          class="z-50 flex items-center justify-center p-2 rounded-md bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          aria-label="Open sidebar"
+          id='sidebar-toggle'
+          type='button'
+          class='z-50 flex items-center justify-center p-2 rounded-md bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300'
+          aria-label='Open sidebar'
         >
           <svg
-            class="h-6 w-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
+            class='h-6 w-6 text-white'
+            fill='none'
+            stroke='currentColor'
+            stroke-width='2'
+            viewBox='0 0 24 24'
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              stroke-linecap='round'
+              stroke-linejoin='round'
+              d='M4 6h16M4 12h16M4 18h16'></path>
           </svg>
         </button>
       </header>
       <div class='relative min-h-screen text-white m-0 p-0'>
         <div
           id='sidebar-container'
-          class='fixed top-0 left-0 h-full w-64 bg-gray-900 transform transition-transform duration-500 ease-in-out -translate-x-full sm:translate-x-0 z-40'
+          class='fixed top-0 left-0 h-full w-64 bg-gray-900 transform transition-transform duration-700 ease-in-out -translate-x-full sm:translate-x-0 z-40'
         >
           <Sidebar />
         </div>
-        <main id="main-content" class='sm:ml-64 p-0 m-0 transition-transform duration-500 ease-in-out'>
-          <slot />
-        </main>
+        <div
+          id='content-overlay'
+          class='fixed inset-0 bg-black bg-opacity-60 z-30 hidden sm:hidden'
+        >
+        </div>
+        <div class="flex flex-col min-h-screen">
+          <main
+            id='main-content'
+            class='flex-1 sm:ml-64 p-0 m-0 transition-all duration-700 ease-in-out opacity-100 translate-x-0'
+            style="height: auto; min-height: 100vh; max-height: 100vh; overflow-y: auto;"
+          >
+            <slot />
+          </main>
+        </div>
       </div>
     </div>
   </body>
@@ -62,7 +81,12 @@ import Sidebar from '../components/Sidebar.astro';
         .getElementById('sidebar-container')
         ?.classList.add('-translate-x-full');
       const content = document.getElementById('main-content');
-      if (content) content.style.transform = '';
+      if (content) {
+        content.style.transform = '';
+        content.classList.remove('brightness-50');
+      }
+      const overlay = document.getElementById('content-overlay');
+      if (overlay) overlay.classList.add('hidden');
     }
     function openSidebar() {
       document
@@ -73,7 +97,10 @@ import Sidebar from '../components/Sidebar.astro';
         const sidebar = document.getElementById('sidebar-container');
         const sidebarWidth = sidebar?.offsetWidth || 0;
         content.style.transform = `translateX(${sidebarWidth}px)`;
+        content.classList.add('brightness-50');
       }
+      const overlay = document.getElementById('content-overlay');
+      if (overlay) overlay.classList.remove('hidden');
     }
     sidebarToggle?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -83,6 +110,57 @@ import Sidebar from '../components/Sidebar.astro';
       } else {
         closeSidebar();
       }
+    });
+    // Close sidebar when a sidebar link is clicked (for mobile)
+    document.querySelectorAll('#sidebar-container a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (!mq.matches) {
+          const sidebarContainer = document.getElementById('sidebar-container');
+          const content = document.getElementById('main-content');
+          const overlay = document.getElementById('content-overlay');
+
+          if (sidebarContainer) {
+            sidebarContainer.style.transition = 'transform 0.7s ease';
+            sidebarContainer.style.transform = 'translateX(-100%)';
+          }
+
+          if (content) {
+            content.style.transition = 'transform 0.7s ease, opacity 0.7s ease';
+            content.style.transform = 'translateX(-100vw)';
+            content.style.opacity = '0';
+          }
+
+          if (overlay) {
+            overlay.classList.add('hidden');
+          }
+
+          setTimeout(() => {
+            closeSidebar();
+
+            if (sidebarContainer) {
+              sidebarContainer.style.transition = '';
+              sidebarContainer.style.transform = '';
+            }
+
+            if (content) {
+              content.style.transition = 'none';
+              content.style.opacity = '0';
+              content.style.transform = 'translateX(100vw)';
+              // Force layout recalculation before starting new transition
+              void content.offsetHeight;
+
+              content.style.transition = 'transform 3s ease, opacity 10s ease';
+              content.style.transform = 'translateX(0)';
+              content.style.opacity = '0';
+
+              // Start fading in after a short delay to sync with transform
+              setTimeout(() => {
+                content.style.opacity = '1';
+              }, 100);
+            }
+          }, 700); // match sidebar/content transition
+        }
+      });
     });
     // Close sidebar when clicking outside
     document.addEventListener('click', (e) => {
