@@ -29,44 +29,44 @@ try {
         <thead class='bg-neutral-800 text-gray-100 text-left text-sm'>
           <tr>
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
             >
               <input type='checkbox' class='form-checkbox text-blue-600' />
             </th>
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
               >Invoice#</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
               >Customer Name</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
               >Date</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
               >Invoice Status</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
               >Due Date</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
               >Invoice Amount</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
               >Balance</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
               >Order Number</th
             >
             <th
-              class='px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
+              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
               >Actions</th
             >
           </tr>
@@ -87,19 +87,19 @@ try {
                 <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
                   {invoice.cf_customer_name}
                 </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
                   {invoice.date || '—'}
                 </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-green-400'>
+                <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400'>
                   {invoice.status}
                 </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
                   {invoice.due_date}
                 </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-right text-gray-200'>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
                   ${Number(invoice.total || 0).toFixed(2)}
                 </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-right text-gray-200'>
+                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
                   ${Number(invoice.balance || 0).toFixed(2)}
                 </td>
                 <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
