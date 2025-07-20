@@ -40,3 +40,24 @@ export const handleZohoRequestWithRetry = async (requestFn) => {
     throw error;
   }
 };
+
+/**
+ * Paginates an array of items
+ * @param {Array} items - The full array of items to paginate
+ * @param {number} page - Current page number (1-based)
+ * @param {number} limit - Number of items per page
+ * @returns {Object} An object with paginated items and pagination metadata
+ */
+export const paginate = (items, page = 1, limit = 10) => {
+  const total = items.length;
+  const start = (page - 1) * limit;
+  const end = page * limit;
+  const paginatedItems = items.slice(start, end);
+
+  return {
+    items: paginatedItems,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit),
+    totalItems: total,
+  };
+};

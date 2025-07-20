@@ -1,28 +1,46 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getZohoInvoices } from '../lib/getZohoInvoices';
 import PageHeader from '../components/PageHeader.astro';
+import PageFooter from '../components/PageFooter.astro';
 
 let invoices = [];
 let isTestData = false;
 
+// Pagination: extract currentPage and limit from URL params
+const urlParams = new URLSearchParams(Astro.request.url.split('?')[1] || '');
+const currentPage = parseInt(urlParams.get('page') || '1', 10);
+const limit = parseInt(urlParams.get('limit') || '10', 10);
+
 try {
-  const result = await getZohoInvoices();
-  invoices = result?.data?.data?.invoices || [];
-  isTestData = result?.isTestData ?? false;
+  // Always use explicit full API URL for server-side fetch
+  const apiUrl = new URL('http://localhost:4321/api/getZohoInvoices');
+  apiUrl.searchParams.set('page', currentPage.toString());
+  apiUrl.searchParams.set('limit', limit.toString());
+  console.log('Fetching invoices from:', apiUrl.toString());
+  const response = await fetch(apiUrl.toString());
+  const json = await response.json();
+
+  if (json?.invoices?.length) {
+    invoices = json.invoices;
+    isTestData = true;
+  } else if (json?.data?.invoices?.length) {
+    invoices = json.data.invoices;
+  } else {
+    invoices = [];
+  }
 } catch (error) {
-  console.error('Error fetching invoices from Zoho:', error);
+  console.error('Error fetching invoices:', error);
   invoices = [];
 }
 ---
 
 <Layout>
-  <div class='bg-neutral-900 px-6 py-4'>
-    <PageHeader>Header</PageHeader>
-    <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
-  </div>
-  <div class='min-h-screen px-0'>
-    <div class='overflow-auto overflow-x-auto max-h-[calc(100vh-96px)] px-0'>
+  <div class='flex flex-col min-h-screen bg-neutral-900'>
+    <div class='px-6 py-4'>
+      <PageHeader>Header</PageHeader>
+      <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
+    </div>
+    <div class='flex-1 overflow-auto px-0'>
       <table
         class='min-w-full table-auto bg-neutral-900 divide-y divide-gray-800 text-sm text-left'
       >
@@ -73,85 +91,305 @@ try {
         </thead>
         <tbody class='text-sm text-gray-100'>
           {
-            invoices.slice(0, 20).map((invoice) => (
-              <tr class='border-t border-[#222222] hover:bg-blue-700 transition-colors duration-200 cursor-pointer'>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
-                  <input
-                    type='checkbox'
-                    class='form-checkbox text-blue-600 row-checkbox'
-                  />
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline'>
-                  {invoice.invoice_number}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
-                  {invoice.cf_customer_name}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                  {invoice.date || '—'}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400'>
-                  {invoice.status}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                  {invoice.due_date}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                  ${Number(invoice.total || 0).toFixed(2)}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                  ${Number(invoice.balance || 0).toFixed(2)}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
-                  {invoice.reference_number || '—'}
-                </td>
-                <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center'>
-                  <div class='relative inline-block text-left'>
-                    <button
-                      class='text-gray-400 hover:text-white focus:outline-none'
-                      aria-label='Open actions'
-                    >
-                      &#8942;
-                    </button>
-                    <div class='hidden absolute right-0 mt-2 w-36 rounded-md bg-neutral-700 shadow-lg z-10 text-sm text-white border border-[#222222] dropdown-menu'>
-                      <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
-                        Download PDF
+            invoices.map((invoice) => (
+              <>
+                <tr
+                  class='border-t border-[#222222] hover:bg-blue-700 transition-colors duration-200 cursor-pointer'
+                  data-invoice-id={invoice.invoice_id}
+                >
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                    {invoice.showDetails ? (
+                      <button class='text-red-500 font-bold text-lg close-invoice'>
+                        &times;
                       </button>
-                      <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
-                        Print
+                    ) : (
+                      <input
+                        type='checkbox'
+                        class='form-checkbox text-blue-600 row-checkbox'
+                      />
+                    )}
+                  </td>
+                  <td
+                    class='px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline cursor-pointer'
+                    data-invoice-toggle
+                  >
+                    {invoice.invoice_number}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                    {invoice.cf_customer_name}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                    {invoice.date || '—'}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400'>
+                    {invoice.status}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                    {invoice.due_date}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                    ${Number(invoice.total || 0).toFixed(2)}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                    ${Number(invoice.balance || 0).toFixed(2)}
+                  </td>
+                  <td class='px-6 py-4 whitespace-normal text-sm text-gray-200'>
+                    {invoice.reference_number || '—'}
+                  </td>
+                  <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center'>
+                    <div class='relative inline-block text-left'>
+                      <button
+                        class='text-gray-400 hover:text-white focus:outline-none'
+                        aria-label='Open actions'
+                      >
+                        &#8942;
                       </button>
-                      <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
-                        Email
-                      </button>
+                      <div class='hidden absolute right-0 mt-2 w-36 rounded-md bg-neutral-700 shadow-lg z-10 text-sm text-white border border-[#222222] dropdown-menu'>
+                        <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
+                          Download PDF
+                        </button>
+                        <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
+                          Print
+                        </button>
+                        <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
+                          Email
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </td>
-              </tr>
+                  </td>
+                </tr>
+                <tr class='hidden invoice-details bg-white text-black'>
+                  <td colspan='10' class='px-6 py-8'>
+                    <div class='bg-white text-black p-8 rounded shadow-md max-w-4xl mx-auto'>
+                      <div class='flex justify-between mb-6'>
+                        <div>
+                          <h2 class='text-xl font-bold'>
+                            Ford Enterprises LLC
+                          </h2>
+                          <p>
+                            4315 Baintree Rd.
+                            <br />
+                            University Heights, OH
+                            <br />
+                            44118
+                          </p>
+                        </div>
+                        <div class='text-right'>
+                          <h1 class='text-3xl font-bold'>Invoice</h1>
+                          <p class='text-sm text-gray-600'>
+                            #{invoice.invoice_number}
+                          </p>
+                        </div>
+                      </div>
+                      <div class='grid grid-cols-2 gap-4 text-sm mb-6'>
+                        <div>
+                          <p class='font-semibold'>Bill To</p>
+                          <p class='text-blue-600'>David Hodous</p>
+                          <p>
+                            2650 Shaker Rd.
+                            <br />
+                            Cleveland Heights
+                            <br />
+                            44118 OH
+                            <br />
+                            U.S.A
+                          </p>
+                        </div>
+                        <div>
+                          <p>
+                            <strong>Invoice Date:</strong> {invoice.date}
+                          </p>
+                          <p>
+                            <strong>Terms:</strong> Custom
+                          </p>
+                          <p>
+                            <strong>Due Date:</strong> {invoice.due_date}
+                          </p>
+                          <p>
+                            <strong>P.O.#:</strong> {invoice.reference_number}
+                          </p>
+                          <p>
+                            <strong>Customer Name:</strong>{' '}
+                            {invoice.cf_customer_name}
+                          </p>
+                        </div>
+                      </div>
+                      <table class='w-full text-sm border border-gray-300 mb-4'>
+                        <thead class='bg-gray-800 text-white'>
+                          <tr>
+                            <th class='px-4 py-2'>#</th>
+                            <th class='px-4 py-2 text-left'>
+                              Item & Description
+                            </th>
+                            <th class='px-4 py-2'>Qty</th>
+                            <th class='px-4 py-2'>Rate</th>
+                            <th class='px-4 py-2'>Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {invoice.lineItems && invoice.lineItems.length > 0 ? (
+                            invoice.lineItems.map((item, index) => (
+                              <tr class='border-t border-gray-300'>
+                                <td class='px-4 py-2'>{index + 1}</td>
+                                <td class='px-4 py-2'>
+                                  {item.name || '[No name]'}
+                                </td>
+                                <td class='px-4 py-2 text-center'>
+                                  {item.quantity || 0}
+                                </td>
+                                <td class='px-4 py-2 text-right'>
+                                  {item.rate || 0}
+                                </td>
+                                <td class='px-4 py-2 text-right'>
+                                  {item.item_total || 0}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr class='border-t border-gray-300'>
+                              <td class='px-4 py-2'>1</td>
+                              <td class='px-4 py-2'>[Item Description]</td>
+                              <td class='px-4 py-2 text-center'>1.00</td>
+                              <td class='px-4 py-2 text-right'>0.00</td>
+                              <td class='px-4 py-2 text-right'>0.00</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                      <div class='text-right text-sm'>
+                        <p class='mb-1'>
+                          <strong>Sub Total:</strong> $
+                          {Number(invoice.total || 0).toFixed(2)}
+                        </p>
+                        <p class='font-bold text-lg'>
+                          <strong>Total:</strong> $
+                          {Number(invoice.total || 0).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </>
             ))
           }
         </tbody>
       </table>
     </div>
   </div>
+</div>
+  <input type="hidden" id="current-page" value={currentPage} />
+  <input type="hidden" id="limit" value={limit} />
+  <PageFooter>
+    <div
+      class='w-full h-[50px] bg-neutral-900 text-white flex items-center justify-center border-t border-neutral-700'
+    >
+      <div
+        class='flex items-center rounded border border-neutral-700 overflow-hidden text-white text-sm bg-neutral-900 shadow-lg'
+      >
+        <form id="per-page-form">
+          <select
+            name="limit"
+            class='bg-neutral-800 text-white px-4 py-1.5 border-r border-neutral-700 focus:outline-none'
+          >
+            {[10, 25, 50, 100, 200].map((val) => (
+              <option value={val} selected={val === limit}>
+                {val} per page
+              </option>
+            ))}
+          </select>
+        </form>
+        <a
+          href={`?page=${currentPage - 1}&limit=${limit}`}
+          class={`px-2 py-1.5 text-blue-500 hover:underline ${currentPage === 1 ? 'pointer-events-none text-gray-500' : ''}`}
+          >&lsaquo;</a
+        >
+        <span class='px-4 py-1.5 bg-neutral-900 border-x border-neutral-700'>
+          {
+            invoices.length > 0
+              ? `${(currentPage - 1) * limit + 1} - ${(currentPage - 1) * limit + invoices.length}`
+              : 'No invoices'
+          }
+        </span>
+        <a
+          href={`?page=${currentPage + 1}&limit=${limit}`}
+          class={`px-2 py-1.5 text-blue-500 hover:underline ${invoices.length < limit ? 'pointer-events-none text-gray-500' : ''}`}
+          >&rsaquo;</a
+        >
+      </div>
+    </div>
+  </PageFooter>
 
-  <script>
-    function toggleSelectAll(masterCheckbox) {
-      const checkboxes = document.querySelectorAll('.row-checkbox');
-      checkboxes.forEach((cb) => {
-        cb.checked = masterCheckbox.checked;
-      });
-    }
-
-    // Attach event listener after DOM content loads
+  <script type="module">
     document.addEventListener('DOMContentLoaded', () => {
-      const masterCheckbox = document.querySelector(
-        'thead input[type="checkbox"]'
-      );
-      if (masterCheckbox) {
-        masterCheckbox.addEventListener('change', function () {
-          toggleSelectAll(this);
-        });
+      const form = document.querySelector('form#per-page-form');
+      const tableBody = document.querySelector('tbody');
+      const paginationDisplay = document.querySelector('span.px-4');
+
+      async function fetchAndRenderInvoices(page, limit) {
+        const url = new URL('/api/getZohoInvoices', window.location.origin);
+        url.searchParams.set('page', page);
+        url.searchParams.set('limit', limit);
+        const res = await fetch(url);
+        const json = await res.json();
+        const invoices = json.invoices || json.data?.invoices || [];
+
+        tableBody.innerHTML = invoices.map((invoice) => `
+          <tr class="border-t border-[#222222] hover:bg-blue-700 transition-colors duration-200 cursor-pointer" data-invoice-id="${invoice.invoice_id}">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
+              <input type="checkbox" class="form-checkbox text-blue-600 row-checkbox" />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline cursor-pointer" data-invoice-toggle>${invoice.invoice_number}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200">${invoice.cf_customer_name}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">${invoice.date || '—'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400">${invoice.status}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">${invoice.due_date}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">$${Number(invoice.total || 0).toFixed(2)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">$${Number(invoice.balance || 0).toFixed(2)}</td>
+            <td class="px-6 py-4 whitespace-normal text-sm text-gray-200">${invoice.reference_number || '—'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center">
+              <div class="relative inline-block text-left">
+                <button class="text-gray-400 hover:text-white focus:outline-none" aria-label="Open actions">&#8942;</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        paginationDisplay.textContent = invoices.length
+          ? `${(page - 1) * limit + 1} - ${(page - 1) * limit + invoices.length}`
+          : 'No invoices';
       }
+
+      let currentPage = parseInt(document.querySelector('#current-page').value, 10);
+      let limit = parseInt(document.querySelector('#limit').value, 10);
+
+      form.addEventListener('change', async (e) => {
+        if (e.target.tagName === 'SELECT') {
+          limit = parseInt(e.target.value, 10);
+          currentPage = 1;
+          await fetchAndRenderInvoices(currentPage, limit);
+        }
+      });
+
+      document.querySelectorAll('a[href^="?page="]').forEach(link => {
+        link.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const url = new URL(e.target.href);
+          const newPage = parseInt(url.searchParams.get('page'), 10);
+          if (!isNaN(newPage)) {
+            currentPage = newPage;
+            await fetchAndRenderInvoices(currentPage, limit);
+          }
+        });
+      });
     });
   </script>
 </Layout>
+</Layout>
+
+<style>
+  .bg-blue-800 {
+    background-color: #1e40af; /* or a darker blue that matches your theme */
+  }
+</style>
+
+

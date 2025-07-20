@@ -13,10 +13,15 @@ setGlobalOptions({ maxInstances: 10 });
 export const getZohoContacts = onRequest(
   { allowInvalidAppCheckToken: true },
   async (req, res) => {
+    // Pagination support
+    const { page, per_page } = req.query;
+    let pagination = '';
+    if (page) pagination += `&page=${page}`;
+    if (per_page) pagination += `&per_page=${per_page}`;
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
         const response = await axios.get(
-          `https://www.zohoapis.com/books/v3/contacts?organization_id=${org_id}&per_page=10`,
+          `https://www.zohoapis.com/books/v3/contacts?organization_id=${org_id}${pagination}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -38,10 +43,15 @@ export const getZohoContacts = onRequest(
 export const getZohoCustomers = onRequest(
   { allowInvalidAppCheckToken: true },
   async (req, res) => {
+    // Pagination support
+    const { page, per_page } = req.query;
+    let pagination = '';
+    if (page) pagination += `&page=${page}`;
+    if (per_page) pagination += `&per_page=${per_page}`;
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
         const response = await axios.get(
-          `https://www.zohoapis.com/books/v3/customers?organization_id=${org_id}&per_page=10`,
+          `https://www.zohoapis.com/books/v3/customers?organization_id=${org_id}${pagination}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -63,10 +73,15 @@ export const getZohoCustomers = onRequest(
 export const getZohoProjects = onRequest(
   { allowInvalidAppCheckToken: true },
   async (req, res) => {
+    // Pagination support
+    const { page, per_page } = req.query;
+    let pagination = '';
+    if (page) pagination += `&page=${page}`;
+    if (per_page) pagination += `&per_page=${per_page}`;
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
         const response = await axios.get(
-          `https://www.zohoapis.com/books/v3/projects?organization_id=${org_id}&per_page=10`,
+          `https://www.zohoapis.com/books/v3/projects?organization_id=${org_id}${pagination}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -163,10 +178,15 @@ export const deleteZohoProject = onRequest(
 export const getZohoInvoices = onRequest(
   { allowInvalidAppCheckToken: true },
   async (req, res) => {
+    // Pagination support
+    const { page, limit } = req.query;
+    let pagination = '';
+    if (page) pagination += `&page=${page}`;
+    if (limit) pagination += `&per_page=${limit}`;
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
         const response = await axios.get(
-          `https://www.zohoapis.com/books/v3/invoices?organization_id=${org_id}&per_page=10`,
+          `https://www.zohoapis.com/books/v3/invoices?organization_id=${org_id}${pagination}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${accessToken}`,
