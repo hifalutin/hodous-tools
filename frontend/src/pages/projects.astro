@@ -37,7 +37,6 @@ try {
                     <input type='checkbox' class='form-checkbox text-blue-600' />
                   </th>
                   <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>Project Name</th>
-                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 hidden sm:table-cell'>Billing Method</th>
                   <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 hidden sm:table-cell'>Rate</th>
                   <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'>Actions</th>
                 </tr>
@@ -52,11 +51,6 @@ try {
                       <input type='checkbox' class='form-checkbox text-blue-600 row-checkbox' />
                     </td>
                     <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>{project.project_name}</td>
-                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 hidden sm:table-cell'>
-                      {project.billing_type
-                        .replaceAll('_', ' ')
-                        .replace(/\b\w/g, (l) => l.toUpperCase())}
-                    </td>
                     <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 hidden sm:table-cell'>
                       ${project.rate?.toFixed(2) || '0.00'}
                     </td>
@@ -77,7 +71,6 @@ try {
                               class="block sm:hidden w-full text-left px-4 py-2 hover:bg-neutral-600 flex items-center space-x-2 cursor-pointer hover:text-blue-400 view-details-btn"
                               data-project-id={project.project_id}
                               data-project-name={project.project_name}
-                              data-billing-type={project.billing_type}
                               data-rate={project.rate?.toFixed(2) || '0.00'}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -115,7 +108,7 @@ try {
                   </tr>
                 )}
                 <tr>
-                  <td colspan="5" class="py-0 !bg-[#111111] border-t-4 border-neutral-800 shadow-inner">
+                  <td colspan="4" class="py-0 !bg-[#111111] border-t-4 border-neutral-800 shadow-inner">
                     <div class="flex justify-center py-6 bg-[#111111] border-y border-[#222] rounded-t-md">
                       <button id="toggleFormBtn" class="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full text-xl font-bold shadow flex items-center justify-center">
                         +

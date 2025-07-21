@@ -40,268 +40,243 @@ try {
       <PageHeader>Header</PageHeader>
       <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
     </div>
-    <div class='flex-1 overflow-auto px-0'>
+    <div class='flex-1 overflow-auto px-0 pb-[60px]'>
       <table
-        class='min-w-full table-auto bg-neutral-900 divide-y divide-gray-800 text-sm text-left'
+        class='min-w-full divide-y divide-neutral-700 border border-neutral-700'
       >
-        <thead class='bg-neutral-800 text-gray-100 text-left text-sm'>
+        <thead class='bg-neutral-800 text-gray-300'>
           <tr>
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider'
             >
-              <input type='checkbox' class='form-checkbox text-blue-600' />
+              <input
+                type='checkbox'
+                id='select-all'
+                class='form-checkbox text-blue-600'
+              />
             </th>
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
-              >Invoice#</th
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              >Invoice #</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
               >Customer Name</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
               >Date</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
-              >Invoice Status</th
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              >Status</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
               >Due Date</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
-              >Invoice Amount</th
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              >Invoice Amt</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
               >Balance</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
-              >Order Number</th
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              >Order #</th
             >
             <th
-              class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'
+              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider'
               >Actions</th
             >
           </tr>
         </thead>
-        <tbody class='text-sm text-gray-100'>
+        <tbody class='bg-neutral-900 divide-y divide-neutral-700'>
           {
-            invoices.map((invoice) => (
-              <>
-                <tr
-                  class='border-t border-[#222222] hover:bg-blue-700 transition-colors duration-200 cursor-pointer'
-                  data-invoice-id={invoice.invoice_id}
-                >
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
-                    {invoice.showDetails ? (
-                      <button class='text-red-500 font-bold text-lg close-invoice'>
-                        &times;
-                      </button>
-                    ) : (
+            invoices.length > 0 ? (
+              invoices.map((invoice) => (
+                <>
+                  <tr
+                    class='border-t border-neutral-700 hover:bg-blue-700 transition-colors duration-200 cursor-pointer'
+                    data-invoice-id={invoice.invoice_id}
+                  >
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
                       <input
                         type='checkbox'
                         class='form-checkbox text-blue-600 row-checkbox'
                       />
-                    )}
-                  </td>
-                  <td
-                    class='px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline cursor-pointer'
-                    data-invoice-toggle
+                    </td>
+                    <td
+                      class='px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline cursor-pointer'
+                      data-invoice-toggle
+                    >
+                      {invoice.invoice_number}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                      {invoice.cf_customer_name}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                      {invoice.date || '—'}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400'>
+                      {invoice.status}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                      {invoice.due_date}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                      ${Number(invoice.total || 0).toFixed(2)}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
+                      ${Number(invoice.balance || 0).toFixed(2)}
+                    </td>
+                    <td class='px-6 py-4 whitespace-normal text-sm text-gray-200'>
+                      {invoice.reference_number || '—'}
+                    </td>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center'>
+                      <div class='relative inline-block text-left'>
+                        <button
+                          class='text-gray-400 hover:text-white focus:outline-none'
+                          aria-label='Open actions'
+                        >
+                          &#8942;
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr
+                    class='hidden bg-neutral-800'
+                    data-invoice-details-for={invoice.invoice_id}
                   >
-                    {invoice.invoice_number}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
-                    {invoice.cf_customer_name}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                    {invoice.date || '—'}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400'>
-                    {invoice.status}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                    {invoice.due_date}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                    ${Number(invoice.total || 0).toFixed(2)}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                    ${Number(invoice.balance || 0).toFixed(2)}
-                  </td>
-                  <td class='px-6 py-4 whitespace-normal text-sm text-gray-200'>
-                    {invoice.reference_number || '—'}
-                  </td>
-                  <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center'>
-                    <div class='relative inline-block text-left'>
-                      <button
-                        class='text-gray-400 hover:text-white focus:outline-none'
-                        aria-label='Open actions'
-                      >
-                        &#8942;
-                      </button>
-                      <div class='hidden absolute right-0 mt-2 w-36 rounded-md bg-neutral-700 shadow-lg z-10 text-sm text-white border border-[#222222] dropdown-menu'>
-                        <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
-                          Download PDF
-                        </button>
-                        <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
-                          Print
-                        </button>
-                        <button class='block w-full text-left px-4 py-2 hover:bg-neutral-600'>
-                          Email
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr class='hidden invoice-details bg-white text-black'>
-                  <td colspan='10' class='px-6 py-8'>
-                    <div class='bg-white text-black p-8 rounded shadow-md max-w-4xl mx-auto'>
-                      <div class='flex justify-between mb-6'>
-                        <div>
-                          <h2 class='text-xl font-bold'>
-                            Ford Enterprises LLC
-                          </h2>
-                          <p>
-                            4315 Baintree Rd.
-                            <br />
-                            University Heights, OH
-                            <br />
-                            44118
-                          </p>
-                        </div>
-                        <div class='text-right'>
-                          <h1 class='text-3xl font-bold'>Invoice</h1>
-                          <p class='text-sm text-gray-600'>
-                            #{invoice.invoice_number}
-                          </p>
-                        </div>
-                      </div>
-                      <div class='grid grid-cols-2 gap-4 text-sm mb-6'>
-                        <div>
-                          <p class='font-semibold'>Bill To</p>
-                          <p class='text-blue-600'>David Hodous</p>
-                          <p>
-                            2650 Shaker Rd.
-                            <br />
-                            Cleveland Heights
-                            <br />
-                            44118 OH
-                            <br />
-                            U.S.A
-                          </p>
-                        </div>
-                        <div>
-                          <p>
-                            <strong>Invoice Date:</strong> {invoice.date}
-                          </p>
-                          <p>
-                            <strong>Terms:</strong> Custom
-                          </p>
-                          <p>
-                            <strong>Due Date:</strong> {invoice.due_date}
-                          </p>
-                          <p>
-                            <strong>P.O.#:</strong> {invoice.reference_number}
-                          </p>
-                          <p>
-                            <strong>Customer Name:</strong>{' '}
-                            {invoice.cf_customer_name}
-                          </p>
-                        </div>
-                      </div>
-                      <table class='w-full text-sm border border-gray-300 mb-4'>
-                        <thead class='bg-gray-800 text-white'>
-                          <tr>
-                            <th class='px-4 py-2'>#</th>
-                            <th class='px-4 py-2 text-left'>
-                              Item & Description
-                            </th>
-                            <th class='px-4 py-2'>Qty</th>
-                            <th class='px-4 py-2'>Rate</th>
-                            <th class='px-4 py-2'>Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {invoice.lineItems && invoice.lineItems.length > 0 ? (
-                            invoice.lineItems.map((item, index) => (
-                              <tr class='border-t border-gray-300'>
-                                <td class='px-4 py-2'>{index + 1}</td>
-                                <td class='px-4 py-2'>
-                                  {item.name || '[No name]'}
+                    <td colspan='10' class='px-6 py-4 text-sm text-gray-300'>
+                      {Array.isArray(invoice.line_items) &&
+                      invoice.line_items.length > 0 ? (
+                        <table class='w-full text-xs bg-neutral-900 border border-neutral-700 rounded-sm mb-2'>
+                          <thead>
+                            <tr class='text-[10px] uppercase text-gray-400 bg-neutral-800 border-b border-neutral-700'>
+                              <th class='px-3 py-2 text-left font-semibold'>
+                                Description
+                              </th>
+                              <th class='px-3 py-2 text-right font-semibold'>
+                                Quantity
+                              </th>
+                              <th class='px-3 py-2 text-right font-semibold'>
+                                Price
+                              </th>
+                              <th class='px-3 py-2 text-right font-semibold'>
+                                Total
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {invoice.line_items.map((item) => (
+                              <tr
+                                class='border-b border-neutral-800 last:border-b-0'
+                                key={item.item_id || item.description}
+                              >
+                                <td class='px-3 py-1 text-gray-300'>
+                                  {item.name || item.description || '—'}
                                 </td>
-                                <td class='px-4 py-2 text-center'>
-                                  {item.quantity || 0}
+                                <td class='px-3 py-1 text-right text-gray-400'>
+                                  {item.quantity ?? '—'}
                                 </td>
-                                <td class='px-4 py-2 text-right'>
-                                  {item.rate || 0}
+                                <td class='px-3 py-1 text-right text-gray-400'>
+                                  $
+                                  {Number(item.rate || item.price || 0).toFixed(
+                                    2
+                                  )}
                                 </td>
-                                <td class='px-4 py-2 text-right'>
-                                  {item.item_total || 0}
+                                <td class='px-3 py-1 text-right text-gray-200'>
+                                  $
+                                  {Number(
+                                    (typeof item.quantity === 'number'
+                                      ? item.quantity
+                                      : parseFloat(item.quantity || 0)) *
+                                      (typeof item.rate === 'number'
+                                        ? item.rate
+                                        : parseFloat(
+                                            item.rate || item.price || 0
+                                          ))
+                                  ).toFixed(2)}
                                 </td>
                               </tr>
-                            ))
-                          ) : (
-                            <tr class='border-t border-gray-300'>
-                              <td class='px-4 py-2'>1</td>
-                              <td class='px-4 py-2'>[Item Description]</td>
-                              <td class='px-4 py-2 text-center'>1.00</td>
-                              <td class='px-4 py-2 text-right'>0.00</td>
-                              <td class='px-4 py-2 text-right'>0.00</td>
+                            ))}
+                            <tr class='border-t border-neutral-700'>
+                              <td
+                                class='px-3 py-2 font-semibold text-right text-gray-300'
+                                colspan='3'
+                              >
+                                Total:
+                              </td>
+                              <td class='px-3 py-2 text-right font-bold text-gray-100'>
+                                $
+                                {invoice.line_items
+                                  .reduce(
+                                    (sum, item) =>
+                                      sum +
+                                      (typeof item.quantity === 'number'
+                                        ? item.quantity
+                                        : parseFloat(item.quantity || 0)) *
+                                        (typeof item.rate === 'number'
+                                          ? item.rate
+                                          : parseFloat(
+                                              item.rate || item.price || 0
+                                            )),
+                                    0
+                                  )
+                                  .toFixed(2)}
+                              </td>
                             </tr>
-                          )}
-                        </tbody>
-                      </table>
-                      <div class='text-right text-sm'>
-                        <p class='mb-1'>
-                          <strong>Sub Total:</strong> $
-                          {Number(invoice.total || 0).toFixed(2)}
-                        </p>
-                        <p class='font-bold text-lg'>
-                          <strong>Total:</strong> $
-                          {Number(invoice.total || 0).toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </>
-            ))
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div class='text-gray-500 italic'>No line items.</div>
+                      )}
+                    </td>
+                  </tr>
+                </>
+              ))
+            ) : (
+              <tr>
+                <td colspan='10' class='px-6 py-4 text-center text-gray-400'>
+                  No invoices found.
+                </td>
+              </tr>
+            )
           }
         </tbody>
       </table>
     </div>
   </div>
-</div>
-  <input type="hidden" id="current-page" value={currentPage} />
-  <input type="hidden" id="limit" value={limit} />
+  <input type='hidden' id='current-page' value={currentPage} />
+  <input type='hidden' id='limit' value={limit} />
   <PageFooter>
     <div
-      class='w-full h-[50px] bg-neutral-900 text-white flex items-center justify-center border-t border-neutral-700'
+      class='fixed bottom-0 left-0 w-full z-20 h-[50px] bg-neutral-900 text-white flex items-center justify-center border-t border-neutral-700'
     >
       <div
         class='flex items-center rounded border border-neutral-700 overflow-hidden text-white text-sm bg-neutral-900 shadow-lg'
       >
-        <form id="per-page-form">
+        <form id='per-page-form'>
           <select
-            name="limit"
+            name='limit'
             class='bg-neutral-800 text-white px-4 py-1.5 border-r border-neutral-700 focus:outline-none'
           >
-            {[10, 25, 50, 100, 200].map((val) => (
-              <option value={val} selected={val === limit}>
-                {val} per page
-              </option>
-            ))}
+            {
+              [10, 25, 50, 100, 200].map((val) => (
+                <option value={val} selected={val === limit}>
+                  {val} per page
+                </option>
+              ))
+            }
           </select>
         </form>
-        <a
-          href={`?page=${currentPage - 1}&limit=${limit}`}
-          class={`px-2 py-1.5 text-blue-500 hover:underline ${currentPage === 1 ? 'pointer-events-none text-gray-500' : ''}`}
-          >&lsaquo;</a
+        <button
+          id='prev-btn'
+          type='button'
+          class={`px-2 py-1.5 text-blue-500 hover:underline`}>&lsaquo;</button
         >
         <span class='px-4 py-1.5 bg-neutral-900 border-x border-neutral-700'>
           {
@@ -310,20 +285,52 @@ try {
               : 'No invoices'
           }
         </span>
-        <a
-          href={`?page=${currentPage + 1}&limit=${limit}`}
-          class={`px-2 py-1.5 text-blue-500 hover:underline ${invoices.length < limit ? 'pointer-events-none text-gray-500' : ''}`}
-          >&rsaquo;</a
+        <button
+          id='next-btn'
+          type='button'
+          class={`px-2 py-1.5 text-blue-500 hover:underline`}>&rsaquo;</button
         >
       </div>
     </div>
   </PageFooter>
 
-  <script type="module">
+  <script type='module'>
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.querySelector('form#per-page-form');
       const tableBody = document.querySelector('tbody');
       const paginationDisplay = document.querySelector('span.px-4');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const selectAllCheckbox = document.getElementById('select-all');
+      let currentPage = parseInt(
+        document.querySelector('#current-page').value,
+        10
+      );
+      let limit = parseInt(document.querySelector('#limit').value, 10);
+      let hasMorePage = false;
+
+      function updatePaginationButtons() {
+        // Previous button
+        if (currentPage === 1) {
+          prevBtn.disabled = true;
+          prevBtn.classList.add('pointer-events-none', 'text-gray-500');
+          prevBtn.classList.remove('text-blue-500');
+        } else {
+          prevBtn.disabled = false;
+          prevBtn.classList.remove('pointer-events-none', 'text-gray-500');
+          prevBtn.classList.add('text-blue-500');
+        }
+        // Next button
+        if (!hasMorePage) {
+          nextBtn.disabled = true;
+          nextBtn.classList.add('pointer-events-none', 'text-gray-500');
+          nextBtn.classList.remove('text-blue-500');
+        } else {
+          nextBtn.disabled = false;
+          nextBtn.classList.remove('pointer-events-none', 'text-gray-500');
+          nextBtn.classList.add('text-blue-500');
+        }
+      }
 
       async function fetchAndRenderInvoices(page, limit) {
         const url = new URL('/api/getZohoInvoices', window.location.origin);
@@ -332,9 +339,85 @@ try {
         const res = await fetch(url);
         const json = await res.json();
         const invoices = json.invoices || json.data?.invoices || [];
+        hasMorePage = invoices.length === limit;
 
-        tableBody.innerHTML = invoices.map((invoice) => `
-          <tr class="border-t border-[#222222] hover:bg-blue-700 transition-colors duration-200 cursor-pointer" data-invoice-id="${invoice.invoice_id}">
+        // Render table rows
+        tableBody.innerHTML =
+          invoices.length > 0
+            ? invoices
+                .map((invoice) => {
+                  // Render line items sub-table if present, else "No line items."
+                  let lineItemsHtml = '';
+                  if (
+                    Array.isArray(invoice.line_items) &&
+                    invoice.line_items.length > 0
+                  ) {
+                    // Sub-table for line items
+                    const itemsRows = invoice.line_items.reduce(
+                      (html, item) =>
+                        html +
+                        `
+                          <tr class="border-b border-neutral-800 last:border-b-0">
+                            <td class="px-3 py-1 text-gray-300">
+                              ${item.name || item.description || '—'}
+                            </td>
+                            <td class="px-3 py-1 text-right text-gray-400">
+                              ${item.quantity ?? '—'}
+                            </td>
+                            <td class="px-3 py-1 text-right text-gray-400">
+                              $${Number(item.rate ?? item.price ?? 0).toFixed(2)}
+                            </td>
+                            <td class="px-3 py-1 text-right text-gray-200">
+                              $${(
+                                (typeof item.quantity === 'number'
+                                  ? item.quantity
+                                  : parseFloat(item.quantity || 0)) *
+                                (typeof item.rate === 'number'
+                                  ? item.rate
+                                  : parseFloat(item.rate || item.price || 0))
+                              ).toFixed(2)}
+                            </td>
+                          </tr>
+                        `,
+                      ''
+                    );
+                    const total = invoice.line_items
+                      .reduce(
+                        (sum, item) =>
+                          sum +
+                          (typeof item.quantity === 'number'
+                            ? item.quantity
+                            : parseFloat(item.quantity || 0)) *
+                            (typeof item.rate === 'number'
+                              ? item.rate
+                              : parseFloat(item.rate || item.price || 0)),
+                        0
+                      )
+                      .toFixed(2);
+                    lineItemsHtml = `
+                        <table class="w-full text-xs bg-neutral-900 border border-neutral-700 rounded-sm mb-2">
+                          <thead>
+                            <tr class="text-[10px] uppercase text-gray-400 bg-neutral-800 border-b border-neutral-700">
+                              <th class="px-3 py-2 text-left font-semibold">Description</th>
+                              <th class="px-3 py-2 text-right font-semibold">Quantity</th>
+                              <th class="px-3 py-2 text-right font-semibold">Price</th>
+                              <th class="px-3 py-2 text-right font-semibold">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${itemsRows}
+                            <tr class="border-t border-neutral-700">
+                              <td class="px-3 py-2 font-semibold text-right text-gray-300" colspan="3">Total:</td>
+                              <td class="px-3 py-2 text-right font-bold text-gray-100">$${total}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      `;
+                  } else {
+                    lineItemsHtml = `<div class="text-gray-500 italic">No line items.</div>`;
+                  }
+                  return `
+          <tr class="border-t border-neutral-700 hover:bg-blue-700 transition-colors duration-200 cursor-pointer" data-invoice-id="${invoice.invoice_id}">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
               <input type="checkbox" class="form-checkbox text-blue-600 row-checkbox" />
             </td>
@@ -352,15 +435,164 @@ try {
               </div>
             </td>
           </tr>
-        `).join('');
+          <tr class="hidden bg-neutral-800" data-invoice-details-for="${invoice.invoice_id}">
+            <td colspan="10" class="px-6 py-4 text-sm text-gray-300">
+              ${lineItemsHtml}
+            </td>
+          </tr>
+        `;
+                })
+                .join('')
+            : `
+          <tr>
+            <td colspan="10" class="px-6 py-4 text-center text-gray-400">No invoices found.</td>
+          </tr>
+        `;
+
+        // Always call these after rendering table
+        attachRowToggleListeners();
+        attachRowCheckboxListeners();
+        updateSelectAllCheckbox();
 
         paginationDisplay.textContent = invoices.length
           ? `${(page - 1) * limit + 1} - ${(page - 1) * limit + invoices.length}`
           : 'No invoices';
+
+        updatePaginationButtons();
       }
 
-      let currentPage = parseInt(document.querySelector('#current-page').value, 10);
-      let limit = parseInt(document.querySelector('#limit').value, 10);
+      function attachRowToggleListeners() {
+        const toggleCells = document.querySelectorAll('[data-invoice-toggle]');
+        toggleCells.forEach((cell) => {
+          cell.onclick = async () => {
+            // Always fetch and fill line items when expanding
+            const row = cell.closest('tr');
+            const invoiceId = row.getAttribute('data-invoice-id');
+            const detailsRow = document.querySelector(
+              `tr[data-invoice-details-for="${invoiceId}"]`
+            );
+            if (detailsRow) {
+              const isHidden = detailsRow.classList.contains('hidden');
+              if (isHidden) {
+                detailsRow.classList.remove('hidden');
+                // Always fetch and fill in line items
+                const td = detailsRow.querySelector('td');
+                if (td) {
+                  td.innerHTML =
+                    "<div class='text-gray-500 italic'>Loading line items...</div>";
+                }
+                try {
+                  const resp = await fetch(
+                    `/api/getZohoInvoiceLineItems?invoice_id=${encodeURIComponent(invoiceId)}`
+                  );
+                  if (!resp.ok) throw new Error('Failed to fetch line items');
+                  const data = await resp.json();
+                  const items = Array.isArray(data.line_items)
+                    ? data.line_items
+                    : [];
+                  // --- Logging fetched line items ---
+                  console.log('Fetched line items:', items);
+                  items.forEach(item => console.log('Line item:', item));
+                  // --- End logging ---
+                  if (items.length > 0) {
+                    // Build markup for the line items sub-table
+                    const itemsRows = items
+                      .map(
+                        (item) => `
+                          <tr class="border-b border-neutral-800 last:border-b-0">
+                            <td class="px-3 py-1 text-gray-300">
+                              ${item.name || item.description || '—'}
+                            </td>
+                            <td class="px-3 py-1 text-right text-gray-400">
+                              ${item.quantity ?? '—'}
+                            </td>
+                            <td class="px-3 py-1 text-right text-gray-400">
+                              $${Number(item.rate ?? item.price ?? 0).toFixed(2)}
+                            </td>
+                            <td class="px-3 py-1 text-right text-gray-200">
+                              $${(
+                                (typeof item.quantity === 'number'
+                                  ? item.quantity
+                                  : parseFloat(item.quantity || 0)) *
+                                (typeof item.rate === 'number'
+                                  ? item.rate
+                                  : parseFloat(item.rate || item.price || 0))
+                              ).toFixed(2)}
+                            </td>
+                          </tr>
+                        `
+                      )
+                      .join('');
+                    const total = items
+                      .reduce(
+                        (sum, item) =>
+                          sum +
+                          (typeof item.quantity === 'number'
+                            ? item.quantity
+                            : parseFloat(item.quantity || 0)) *
+                            (typeof item.rate === 'number'
+                              ? item.rate
+                              : parseFloat(item.rate || item.price || 0)),
+                        0
+                      )
+                      .toFixed(2);
+                    td.innerHTML = `
+                      <table class="w-full text-xs bg-neutral-900 border border-neutral-700 rounded-sm mb-2">
+                        <thead>
+                          <tr class="text-[10px] uppercase text-gray-400 bg-neutral-800 border-b border-neutral-700">
+                            <th class="px-3 py-2 text-left font-semibold">Description</th>
+                            <th class="px-3 py-2 text-right font-semibold">Quantity</th>
+                            <th class="px-3 py-2 text-right font-semibold">Price</th>
+                            <th class="px-3 py-2 text-right font-semibold">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${itemsRows}
+                          <tr class="border-t border-neutral-700">
+                            <td class="px-3 py-2 font-semibold text-right text-gray-300" colspan="3">Total:</td>
+                            <td class="px-3 py-2 text-right font-bold text-gray-100">$${total}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    `;
+                  } else {
+                    td.innerHTML = `<div class="text-gray-500 italic">No line items.</div>`;
+                  }
+                  detailsRow.dataset.loaded = 'true';
+                } catch (err) {
+                  if (td) {
+                    td.innerHTML = `<div class="text-red-500 italic">Error loading line items.</div>`;
+                  }
+                }
+              } else {
+                detailsRow.classList.add('hidden');
+              }
+            }
+          };
+        });
+      }
+
+      function attachRowCheckboxListeners() {
+        const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
+        rowCheckboxes.forEach((checkbox) => {
+          checkbox.addEventListener('change', updateSelectAllCheckbox);
+        });
+      }
+
+      function updateSelectAllCheckbox() {
+        const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
+        const allChecked = Array.from(rowCheckboxes).every((cb) => cb.checked);
+        selectAllCheckbox.checked = allChecked && rowCheckboxes.length > 0;
+        const someChecked = Array.from(rowCheckboxes).some((cb) => cb.checked);
+        selectAllCheckbox.indeterminate = !allChecked && someChecked;
+      }
+
+      selectAllCheckbox.addEventListener('change', () => {
+        const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
+        rowCheckboxes.forEach((cb) => {
+          cb.checked = selectAllCheckbox.checked;
+        });
+      });
 
       form.addEventListener('change', async (e) => {
         if (e.target.tagName === 'SELECT') {
@@ -370,20 +602,28 @@ try {
         }
       });
 
-      document.querySelectorAll('a[href^="?page="]').forEach(link => {
-        link.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const url = new URL(e.target.href);
-          const newPage = parseInt(url.searchParams.get('page'), 10);
-          if (!isNaN(newPage)) {
-            currentPage = newPage;
-            await fetchAndRenderInvoices(currentPage, limit);
-          }
-        });
+      prevBtn.addEventListener('click', async () => {
+        if (currentPage > 1) {
+          currentPage -= 1;
+          await fetchAndRenderInvoices(currentPage, limit);
+        }
       });
+      nextBtn.addEventListener('click', async () => {
+        if (hasMorePage) {
+          currentPage += 1;
+          await fetchAndRenderInvoices(currentPage, limit);
+        }
+      });
+
+      // Initial state for buttons
+      hasMorePage =
+        document.querySelector('tbody').children.length / 2 === limit;
+      updatePaginationButtons();
+      attachRowToggleListeners();
+      attachRowCheckboxListeners();
+      updateSelectAllCheckbox();
     });
   </script>
-</Layout>
 </Layout>
 
 <style>
@@ -391,5 +631,3 @@ try {
     background-color: #1e40af; /* or a darker blue that matches your theme */
   }
 </style>
-
-

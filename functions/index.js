@@ -204,3 +204,34 @@ export const getZohoInvoices = onRequest(
     }
   }
 );
+
+export const getZohoInvoiceLineItems = onRequest(
+  { allowInvalidAppCheckToken: true },
+  async (req, res) => {
+    const { invoice_id } = req.query;
+    if (!invoice_id) {
+      return res.status(400).send({ success: false, error: "Missing invoice_id" });
+    }
+
+    try {
+      const data = await handleZohoRequestWithRetry(async (accessToken) => {
+        const response = await axios.get(
+          `https://www.zohoapis.com/books/v3/invoices/${invoice_id}?organization_id=${org_id}`,
+          {
+            headers: {
+              Authorization: `Zoho-oauthtoken ${accessToken}`,
+            },
+          }
+        );
+        return response.data;
+      });
+
+      const line_items = data?.invoice?.line_items || [];
+      res.status(200).send({ success: true, line_items });
+    } catch (error) {
+      const errMsg = error.response?.data || error.message;
+      console.error('Zoho line items error:', errMsg);
+      res.status(500).send({ success: false, error: errMsg });
+    }
+  }
+);
