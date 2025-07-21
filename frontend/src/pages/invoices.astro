@@ -42,12 +42,12 @@ try {
     </div>
     <div class='flex-1 overflow-auto px-0 pb-[60px]'>
       <table
-        class='min-w-full divide-y divide-neutral-700 border border-neutral-700'
+        class='w-full'
       >
         <thead class='bg-neutral-800 text-gray-300'>
           <tr>
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider'
             >
               <input
                 type='checkbox'
@@ -56,50 +56,50 @@ try {
               />
             </th>
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Invoice #</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Customer Name</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Date</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Status</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Due Date</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Invoice Amt</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Balance</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider cursor-pointer'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Order #</th
             >
             <th
-              class='px-6 py-3 text-left text-[9px] font-medium uppercase tracking-wider'
+              class='px-6 py-3 text-left text-sm uppercase tracking-wider'
               >Actions</th
             >
           </tr>
         </thead>
-        <tbody class='bg-neutral-900 divide-y divide-neutral-700'>
+        <tbody class='bg-neutral-900'>
           {
             invoices.length > 0 ? (
               invoices.map((invoice) => (
                 <>
                   <tr
-                    class='border-t border-neutral-700 hover:bg-blue-700 transition-colors duration-200 cursor-pointer'
+                    class='hover:bg-blue-700 transition-colors duration-200 cursor-pointer'
                     data-invoice-id={invoice.invoice_id}
                   >
                     <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
@@ -109,7 +109,7 @@ try {
                       />
                     </td>
                     <td
-                      class='px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline cursor-pointer'
+                      class='px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:underline cursor-pointer'
                       data-invoice-toggle
                     >
                       {invoice.invoice_number}
@@ -120,7 +120,7 @@ try {
                     <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
                       {invoice.date || '—'}
                     </td>
-                    <td class='px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400'>
+                    <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-green-400'>
                       {invoice.status}
                     </td>
                     <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
@@ -153,19 +153,19 @@ try {
                     <td colspan='10' class='px-6 py-4 text-sm text-gray-300'>
                       {Array.isArray(invoice.line_items) &&
                       invoice.line_items.length > 0 ? (
-                        <table class='w-full text-xs bg-neutral-900 border border-neutral-700 rounded-sm mb-2'>
+                        <table class='w-full text-xs'>
                           <thead>
-                            <tr class='text-[10px] uppercase text-gray-400 bg-neutral-800 border-b border-neutral-700'>
-                              <th class='px-3 py-2 text-left font-semibold'>
+                            <tr class='text-sm uppercase text-gray-400 bg-neutral-800'>
+                              <th class='px-3 py-2 text-left'>
                                 Description
                               </th>
-                              <th class='px-3 py-2 text-right font-semibold'>
+                              <th class='px-3 py-2 text-right'>
                                 Quantity
                               </th>
-                              <th class='px-3 py-2 text-right font-semibold'>
+                              <th class='px-3 py-2 text-right'>
                                 Price
                               </th>
-                              <th class='px-3 py-2 text-right font-semibold'>
+                              <th class='px-3 py-2 text-right'>
                                 Total
                               </th>
                             </tr>
@@ -173,7 +173,6 @@ try {
                           <tbody>
                             {invoice.line_items.map((item) => (
                               <tr
-                                class='border-b border-neutral-800 last:border-b-0'
                                 key={item.item_id || item.description}
                               >
                                 <td class='px-3 py-1 text-gray-300'>
@@ -203,14 +202,14 @@ try {
                                 </td>
                               </tr>
                             ))}
-                            <tr class='border-t border-neutral-700'>
+                            <tr>
                               <td
-                                class='px-3 py-2 font-semibold text-right text-gray-300'
+                                class='px-3 py-2 text-right text-gray-300'
                                 colspan='3'
                               >
                                 Total:
                               </td>
-                              <td class='px-3 py-2 text-right font-bold text-gray-100'>
+                              <td class='px-3 py-2 text-right text-gray-100'>
                                 $
                                 {invoice.line_items
                                   .reduce(
@@ -357,7 +356,7 @@ try {
                       (html, item) =>
                         html +
                         `
-                          <tr class="border-b border-neutral-800 last:border-b-0">
+                          <tr>
                             <td class="px-3 py-1 text-gray-300">
                               ${item.name || item.description || '—'}
                             </td>
@@ -395,20 +394,20 @@ try {
                       )
                       .toFixed(2);
                     lineItemsHtml = `
-                        <table class="w-full text-xs bg-neutral-900 border border-neutral-700 rounded-sm mb-2">
+                        <table class="w-full text-xs">
                           <thead>
-                            <tr class="text-[10px] uppercase text-gray-400 bg-neutral-800 border-b border-neutral-700">
-                              <th class="px-3 py-2 text-left font-semibold">Description</th>
-                              <th class="px-3 py-2 text-right font-semibold">Quantity</th>
-                              <th class="px-3 py-2 text-right font-semibold">Price</th>
-                              <th class="px-3 py-2 text-right font-semibold">Total</th>
+                            <tr class="text-sm uppercase text-gray-400 bg-neutral-800">
+                              <th class="px-3 py-2 text-left">Description</th>
+                              <th class="px-3 py-2 text-right">Quantity</th>
+                              <th class="px-3 py-2 text-right">Price</th>
+                              <th class="px-3 py-2 text-right">Total</th>
                             </tr>
                           </thead>
                           <tbody>
                             ${itemsRows}
-                            <tr class="border-t border-neutral-700">
-                              <td class="px-3 py-2 font-semibold text-right text-gray-300" colspan="3">Total:</td>
-                              <td class="px-3 py-2 text-right font-bold text-gray-100">$${total}</td>
+                            <tr>
+                              <td class="px-3 py-2 text-right text-gray-300" colspan="3">Total:</td>
+                              <td class="px-3 py-2 text-right text-gray-100">$${total}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -417,14 +416,14 @@ try {
                     lineItemsHtml = `<div class="text-gray-500 italic">No line items.</div>`;
                   }
                   return `
-          <tr class="border-t border-neutral-700 hover:bg-blue-700 transition-colors duration-200 cursor-pointer" data-invoice-id="${invoice.invoice_id}">
+          <tr class="hover:bg-blue-700 transition-colors duration-200 cursor-pointer" data-invoice-id="${invoice.invoice_id}">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
               <input type="checkbox" class="form-checkbox text-blue-600 row-checkbox" />
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-400 hover:underline cursor-pointer" data-invoice-toggle>${invoice.invoice_number}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:underline cursor-pointer" data-invoice-toggle>${invoice.invoice_number}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200">${invoice.cf_customer_name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">${invoice.date || '—'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center text-green-400">${invoice.status}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-green-400">${invoice.status}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">${invoice.due_date}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">$${Number(invoice.total || 0).toFixed(2)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200">$${Number(invoice.balance || 0).toFixed(2)}</td>
@@ -537,20 +536,20 @@ try {
                       )
                       .toFixed(2);
                     td.innerHTML = `
-                      <table class="w-full text-xs bg-neutral-900 border border-neutral-700 rounded-sm mb-2">
+                      <table class="w-full text-xs">
                         <thead>
-                          <tr class="text-[10px] uppercase text-gray-400 bg-neutral-800 border-b border-neutral-700">
-                            <th class="px-3 py-2 text-left font-semibold">Description</th>
-                            <th class="px-3 py-2 text-right font-semibold">Quantity</th>
-                            <th class="px-3 py-2 text-right font-semibold">Price</th>
-                            <th class="px-3 py-2 text-right font-semibold">Total</th>
+                          <tr class="text-sm uppercase text-gray-400 bg-neutral-800">
+                            <th class="px-3 py-2 text-left">Description</th>
+                            <th class="px-3 py-2 text-right">Quantity</th>
+                            <th class="px-3 py-2 text-right">Price</th>
+                            <th class="px-3 py-2 text-right">Total</th>
                           </tr>
                         </thead>
                         <tbody>
                           ${itemsRows}
-                          <tr class="border-t border-neutral-700">
-                            <td class="px-3 py-2 font-semibold text-right text-gray-300" colspan="3">Total:</td>
-                            <td class="px-3 py-2 text-right font-bold text-gray-100">$${total}</td>
+                          <tr>
+                            <td class="px-3 py-2 text-right text-gray-300" colspan="3">Total:</td>
+                            <td class="px-3 py-2 text-right text-gray-100">$${total}</td>
                           </tr>
                         </tbody>
                       </table>
