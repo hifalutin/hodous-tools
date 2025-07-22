@@ -13,7 +13,9 @@ const limit = parseInt(urlParams.get('limit') || '10', 10);
 
 try {
   // Always use explicit full API URL for server-side fetch
-  const apiUrl = new URL('http://localhost:4321/api/getZohoInvoices');
+  const apiUrl = new URL(
+    'http://localhost:4321/api/getZohoInvoicesWithLineItems'
+  );
   apiUrl.searchParams.set('page', currentPage.toString());
   apiUrl.searchParams.set('limit', limit.toString());
   console.log('Fetching invoices from:', apiUrl.toString());
@@ -36,19 +38,15 @@ try {
 
 <Layout>
   <div class='flex flex-col min-h-screen bg-neutral-900'>
-    <div class='px-6 py-4'>
-      <PageHeader>Header</PageHeader>
-      <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
-    </div>
     <div class='flex-1 overflow-auto px-0 pb-[60px]'>
-      <table
-        class='w-full'
-      >
-        <thead class='bg-neutral-800 text-gray-300'>
+      <table class='w-full'>
+        <thead class='bg-neutral-800 text-gray-300 sticky top-0 z-20 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]'>
+          <div class='px-6 py-4'>
+            <PageHeader>Header</PageHeader>
+            <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
+          </div>
           <tr>
-            <th
-              class='px-6 py-3 text-left text-sm uppercase tracking-wider'
-            >
+            <th class='px-6 py-3 text-left text-sm uppercase tracking-wider'>
               <input
                 type='checkbox'
                 id='select-all'
@@ -87,8 +85,7 @@ try {
               class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
               >Order #</th
             >
-            <th
-              class='px-6 py-3 text-left text-sm uppercase tracking-wider'
+            <th class='px-6 py-3 text-left text-sm uppercase tracking-wider'
               >Actions</th
             >
           </tr>
@@ -156,25 +153,15 @@ try {
                         <table class='w-full text-xs'>
                           <thead>
                             <tr class='text-sm uppercase text-gray-400 bg-neutral-800'>
-                              <th class='px-3 py-2 text-left'>
-                                Description
-                              </th>
-                              <th class='px-3 py-2 text-right'>
-                                Quantity
-                              </th>
-                              <th class='px-3 py-2 text-right'>
-                                Price
-                              </th>
-                              <th class='px-3 py-2 text-right'>
-                                Total
-                              </th>
+                              <th class='px-3 py-2 text-left'>Description</th>
+                              <th class='px-3 py-2 text-right'>Quantity</th>
+                              <th class='px-3 py-2 text-right'>Price</th>
+                              <th class='px-3 py-2 text-right'>Total</th>
                             </tr>
                           </thead>
                           <tbody>
                             {invoice.line_items.map((item) => (
-                              <tr
-                                key={item.item_id || item.description}
-                              >
+                              <tr key={item.item_id || item.description}>
                                 <td class='px-3 py-1 text-gray-300'>
                                   {item.name || item.description || '—'}
                                 </td>
@@ -332,7 +319,10 @@ try {
       }
 
       async function fetchAndRenderInvoices(page, limit) {
-        const url = new URL('/api/getZohoInvoices', window.location.origin);
+        const url = new URL(
+          '/api/getZohoInvoicesWithLineItems',
+          window.location.origin
+        );
         url.searchParams.set('page', page);
         url.searchParams.set('limit', limit);
         const res = await fetch(url);
@@ -463,8 +453,7 @@ try {
       function attachRowToggleListeners() {
         const toggleCells = document.querySelectorAll('[data-invoice-toggle]');
         toggleCells.forEach((cell) => {
-          cell.onclick = async () => {
-            // Always fetch and fill line items when expanding
+          cell.onclick = () => {
             const row = cell.closest('tr');
             const invoiceId = row.getAttribute('data-invoice-id');
             const detailsRow = document.querySelector(
@@ -474,95 +463,6 @@ try {
               const isHidden = detailsRow.classList.contains('hidden');
               if (isHidden) {
                 detailsRow.classList.remove('hidden');
-                // Always fetch and fill in line items
-                const td = detailsRow.querySelector('td');
-                if (td) {
-                  td.innerHTML =
-                    "<div class='text-gray-500 italic'>Loading line items...</div>";
-                }
-                try {
-                  const resp = await fetch(
-                    `/api/getZohoInvoiceLineItems?invoice_id=${encodeURIComponent(invoiceId)}`
-                  );
-                  if (!resp.ok) throw new Error('Failed to fetch line items');
-                  const data = await resp.json();
-                  const items = Array.isArray(data.line_items)
-                    ? data.line_items
-                    : [];
-                  // --- Logging fetched line items ---
-                  console.log('Fetched line items:', items);
-                  items.forEach(item => console.log('Line item:', item));
-                  // --- End logging ---
-                  if (items.length > 0) {
-                    // Build markup for the line items sub-table
-                    const itemsRows = items
-                      .map(
-                        (item) => `
-                          <tr class="border-b border-neutral-800 last:border-b-0">
-                            <td class="px-3 py-1 text-gray-300">
-                              ${item.name || item.description || '—'}
-                            </td>
-                            <td class="px-3 py-1 text-right text-gray-400">
-                              ${item.quantity ?? '—'}
-                            </td>
-                            <td class="px-3 py-1 text-right text-gray-400">
-                              $${Number(item.rate ?? item.price ?? 0).toFixed(2)}
-                            </td>
-                            <td class="px-3 py-1 text-right text-gray-200">
-                              $${(
-                                (typeof item.quantity === 'number'
-                                  ? item.quantity
-                                  : parseFloat(item.quantity || 0)) *
-                                (typeof item.rate === 'number'
-                                  ? item.rate
-                                  : parseFloat(item.rate || item.price || 0))
-                              ).toFixed(2)}
-                            </td>
-                          </tr>
-                        `
-                      )
-                      .join('');
-                    const total = items
-                      .reduce(
-                        (sum, item) =>
-                          sum +
-                          (typeof item.quantity === 'number'
-                            ? item.quantity
-                            : parseFloat(item.quantity || 0)) *
-                            (typeof item.rate === 'number'
-                              ? item.rate
-                              : parseFloat(item.rate || item.price || 0)),
-                        0
-                      )
-                      .toFixed(2);
-                    td.innerHTML = `
-                      <table class="w-full text-xs">
-                        <thead>
-                          <tr class="text-sm uppercase text-gray-400 bg-neutral-800">
-                            <th class="px-3 py-2 text-left">Description</th>
-                            <th class="px-3 py-2 text-right">Quantity</th>
-                            <th class="px-3 py-2 text-right">Price</th>
-                            <th class="px-3 py-2 text-right">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${itemsRows}
-                          <tr>
-                            <td class="px-3 py-2 text-right text-gray-300" colspan="3">Total:</td>
-                            <td class="px-3 py-2 text-right text-gray-100">$${total}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    `;
-                  } else {
-                    td.innerHTML = `<div class="text-gray-500 italic">No line items.</div>`;
-                  }
-                  detailsRow.dataset.loaded = 'true';
-                } catch (err) {
-                  if (td) {
-                    td.innerHTML = `<div class="text-red-500 italic">Error loading line items.</div>`;
-                  }
-                }
               } else {
                 detailsRow.classList.add('hidden');
               }

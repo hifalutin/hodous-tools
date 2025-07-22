@@ -235,3 +235,61 @@ export const getZohoInvoiceLineItems = onRequest(
     }
   }
 );
+
+
+export const getZohoInvoicesWithLineItems = onRequest(
+  { allowInvalidAppCheckToken: true },
+  async (req, res) => {
+    // Pagination support
+    const { page, limit } = req.query;
+    let pagination = '';
+    if (page) pagination += `&page=${page}`;
+    if (limit) pagination += `&per_page=${limit}`;
+
+    try {
+      // Step 1: Fetch paginated invoices
+      const invoiceListData = await handleZohoRequestWithRetry(async (accessToken) => {
+        const response = await axios.get(
+          `https://www.zohoapis.com/books/v3/invoices?organization_id=${org_id}${pagination}`,
+          {
+            headers: {
+              Authorization: `Zoho-oauthtoken ${accessToken}`,
+            },
+          }
+        );
+        return response.data;
+      });
+
+      const invoices = invoiceListData?.invoices || [];
+
+      // Step 2: Fetch line items for each invoice in parallel
+      const invoicesWithLineItems = await Promise.all(
+        invoices.map(async (invoice) => {
+          try {
+            const detailData = await handleZohoRequestWithRetry(async (accessToken) => {
+              const detailResp = await axios.get(
+                `https://www.zohoapis.com/books/v3/invoices/${invoice.invoice_id}?organization_id=${org_id}`,
+                {
+                  headers: {
+                    Authorization: `Zoho-oauthtoken ${accessToken}`,
+                  },
+                }
+              );
+              return detailResp.data;
+            });
+            invoice.line_items = detailData?.invoice?.line_items || [];
+          } catch (err) {
+            invoice.line_items = [];
+          }
+          return invoice;
+        })
+      );
+
+      res.status(200).send({ success: true, invoices: invoicesWithLineItems });
+    } catch (error) {
+      const errMsg = error.response?.data || error.message;
+      console.error('Combined invoice + line items error:', errMsg);
+      res.status(500).send({ success: false, error: errMsg });
+    }
+  }
+);
