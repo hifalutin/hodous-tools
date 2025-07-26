@@ -4,6 +4,8 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { handleZohoRequestWithRetry } from './helpers/zoho.js';
 import { onRequest } from 'firebase-functions/v2/https';
+import { db } from './helpers/firebase.js';
+import { Timestamp } from 'firebase-admin/firestore';
 
 dotenv.config();
 
@@ -30,8 +32,9 @@ export const getZohoContacts = onRequest(
         );
         return response.data;
       });
+      const contacts = data.contacts || [];
 
-      res.status(200).send({ success: true, data });
+      res.status(200).send({ success: true, data: { contacts } });
     } catch (error) {
       const errMsg = error.response?.data || error.message;
       console.error('Zoho API error:', errMsg);
@@ -60,8 +63,9 @@ export const getZohoCustomers = onRequest(
         );
         return response.data;
       });
+      const customers = data.customers || [];
 
-      res.status(200).send({ success: true, data });
+      res.status(200).send({ success: true, data: { customers } });
     } catch (error) {
       const errMsg = error.response?.data || error.message;
       console.error('Zoho API error:', errMsg);
@@ -90,8 +94,9 @@ export const getZohoProjects = onRequest(
         );
         return response.data;
       });
+      const projects = data.projects || [];
 
-      res.status(200).send({ success: true, data });
+      res.status(200).send({ success: true, data: { projects } });
     } catch (error) {
       const errMsg = error.response?.data || error.message;
       console.error('Zoho API error:', errMsg);
@@ -183,20 +188,20 @@ export const getZohoInvoices = onRequest(
     let pagination = '';
     if (page) pagination += `&page=${page}`;
     if (limit) pagination += `&per_page=${limit}`;
+
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
         const response = await axios.get(
           `https://www.zohoapis.com/books/v3/invoices?organization_id=${org_id}${pagination}`,
           {
-            headers: {
-              Authorization: `Zoho-oauthtoken ${accessToken}`,
-            },
+            headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
           }
         );
         return response.data;
       });
+      const invoices = data.invoices || [];
 
-      res.status(200).send({ success: true, data });
+      res.status(200).send({ success: true, data: { invoices } });
     } catch (error) {
       const errMsg = error.response?.data || error.message;
       console.error('Zoho API error:', errMsg);
@@ -210,7 +215,9 @@ export const getZohoInvoiceLineItems = onRequest(
   async (req, res) => {
     const { invoice_id } = req.query;
     if (!invoice_id) {
-      return res.status(400).send({ success: false, error: "Missing invoice_id" });
+      return res
+        .status(400)
+        .send({ success: false, error: 'Missing invoice_id' });
     }
 
     try {
@@ -236,60 +243,44 @@ export const getZohoInvoiceLineItems = onRequest(
   }
 );
 
-
-export const getZohoInvoicesWithLineItems = onRequest(
+export const importTestDataToFirestore = onRequest(
   { allowInvalidAppCheckToken: true },
   async (req, res) => {
-    // Pagination support
-    const { page, limit } = req.query;
-    let pagination = '';
-    if (page) pagination += `&page=${page}`;
-    if (limit) pagination += `&per_page=${limit}`;
+    const { filePath, collectionPath } = req.query;
+
+    if (!filePath || !collectionPath) {
+      return res.status(400).send({
+        success: false,
+        error: 'Missing required query parameters: filePath and collectionPath',
+      });
+    }
 
     try {
-      // Step 1: Fetch paginated invoices
-      const invoiceListData = await handleZohoRequestWithRetry(async (accessToken) => {
-        const response = await axios.get(
-          `https://www.zohoapis.com/books/v3/invoices?organization_id=${org_id}${pagination}`,
-          {
-            headers: {
-              Authorization: `Zoho-oauthtoken ${accessToken}`,
-            },
-          }
-        );
-        return response.data;
+      const data = (await import(`./${filePath}`)).default;
+
+      if (!Array.isArray(data)) {
+        return res.status(400).send({
+          success: false,
+          error: 'JSON file must export an array of objects',
+        });
+      }
+
+      const batch = db.batch();
+      data.forEach((doc) => {
+        const docId =
+          doc.id || (doc.invoice_id ? doc.invoice_id.toString() : undefined) || db.collection(collectionPath).doc().id;
+        const ref = db.collection(collectionPath).doc(docId);
+        batch.set(ref, doc);
       });
 
-      const invoices = invoiceListData?.invoices || [];
-
-      // Step 2: Fetch line items for each invoice in parallel
-      const invoicesWithLineItems = await Promise.all(
-        invoices.map(async (invoice) => {
-          try {
-            const detailData = await handleZohoRequestWithRetry(async (accessToken) => {
-              const detailResp = await axios.get(
-                `https://www.zohoapis.com/books/v3/invoices/${invoice.invoice_id}?organization_id=${org_id}`,
-                {
-                  headers: {
-                    Authorization: `Zoho-oauthtoken ${accessToken}`,
-                  },
-                }
-              );
-              return detailResp.data;
-            });
-            invoice.line_items = detailData?.invoice?.line_items || [];
-          } catch (err) {
-            invoice.line_items = [];
-          }
-          return invoice;
-        })
-      );
-
-      res.status(200).send({ success: true, invoices: invoicesWithLineItems });
+      await batch.commit();
+      res.status(200).send({
+        success: true,
+        message: 'Data uploaded to Firestore.',
+      });
     } catch (error) {
-      const errMsg = error.response?.data || error.message;
-      console.error('Combined invoice + line items error:', errMsg);
-      res.status(500).send({ success: false, error: errMsg });
+      console.error('Firestore import error:', error.message);
+      res.status(500).send({ success: false, error: error.message });
     }
   }
 );

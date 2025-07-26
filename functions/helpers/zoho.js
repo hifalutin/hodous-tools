@@ -1,15 +1,40 @@
+// helpers/firebase.js
+
+import { initializeApp, applicationDefault, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+
+if (!getApps().length) {
+  initializeApp({
+    credential: applicationDefault(),
+  });
+}
+
 // helpers/zoho.js
 
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { db } from './firebase.js';
 
 dotenv.config();
+
+const DEFAULT_TTL = parseInt(process.env.ZC_TTL_MS || '30000');
 
 const client_id = process.env.ZOHO_CLIENT_ID;
 const client_secret = process.env.ZOHO_CLIENT_SECRET;
 const refresh_token = process.env.ZOHO_REFRESH_TOKEN;
 
-export const getFreshAccessToken = async () => {
+export const getAccessToken = async (serviceName) => {
+  const TOKEN_DOC = db.collection('access_tokens').doc(serviceName);
+  const doc = await TOKEN_DOC.get();
+  const now = Date.now();
+
+  if (doc.exists) {
+    const data = doc.data();
+    if (data.token && data.expiresAt > now) {
+      return data.token;
+    }
+  }
+
   const res = await axios.post(
     'https://accounts.zoho.com/oauth/v2/token',
     new URLSearchParams({
@@ -25,39 +50,49 @@ export const getFreshAccessToken = async () => {
     }
   );
 
-  return res.data.access_token;
+  const token = res.data.access_token;
+  const expiresAt = now + 60 * 60 * 1000;
+
+  await TOKEN_DOC.set({ token, expiresAt }, { merge: true });
+
+  return token;
 };
 
 // ⛑ Error handler wrapper
 export const handleZohoRequestWithRetry = async (requestFn) => {
   try {
-    return await requestFn();
+    const token = await getAccessToken('zoho');
+    return await requestFn(token);
   } catch (error) {
     if (error.response?.status === 401) {
-      const newToken = await getFreshAccessToken();
-      return await requestFn(newToken); // retry with new token
+      const TOKEN_DOC = db.collection('access_tokens').doc('zoho');
+      await TOKEN_DOC.delete(); // force refresh
+      const newToken = await getAccessToken('zoho');
+      return await requestFn(newToken);
     }
     throw error;
   }
 };
 
-/**
- * Paginates an array of items
- * @param {Array} items - The full array of items to paginate
- * @param {number} page - Current page number (1-based)
- * @param {number} limit - Number of items per page
- * @returns {Object} An object with paginated items and pagination metadata
- */
-export const paginate = (items, page = 1, limit = 10) => {
-  const total = items.length;
-  const start = (page - 1) * limit;
-  const end = page * limit;
-  const paginatedItems = items.slice(start, end);
+export const fetchWithCache = async (key, ttlMs = DEFAULT_TTL, collection, fetchFn) => {
+  const cacheDoc = db.collection('cache_control').doc(key);
+  const cacheData = await cacheDoc.get();
+  const now = Date.now();
 
-  return {
-    items: paginatedItems,
-    currentPage: page,
-    totalPages: Math.ceil(total / limit),
-    totalItems: total,
-  };
+  if (cacheData.exists && now - cacheData.data().lastFetched < ttlMs) {
+    const snapshot = await db.collection('cached_data').doc(key).collection(collection).get();
+    return snapshot.docs.map(doc => doc.data());
+  }
+
+  const items = await fetchFn();
+
+  const batch = db.batch();
+  items.forEach(item => {
+    const ref = db.collection('cached_data').doc(key).collection(collection).doc(item.invoice_id);
+    batch.set(ref, item, { merge: true });
+  });
+  batch.set(cacheDoc, { lastFetched: now });
+  await batch.commit();
+
+  return items;
 };
