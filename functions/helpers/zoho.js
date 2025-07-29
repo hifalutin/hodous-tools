@@ -1,7 +1,6 @@
 // helpers/firebase.js
 
 import { initializeApp, applicationDefault, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
 
 if (!getApps().length) {
   initializeApp({
@@ -74,21 +73,34 @@ export const handleZohoRequestWithRetry = async (requestFn) => {
   }
 };
 
-export const fetchWithCache = async (key, ttlMs = DEFAULT_TTL, collection, fetchFn) => {
+export const fetchWithCache = async (
+  key,
+  ttlMs = DEFAULT_TTL,
+  collection,
+  fetchFn
+) => {
   const cacheDoc = db.collection('cache_control').doc(key);
   const cacheData = await cacheDoc.get();
   const now = Date.now();
 
   if (cacheData.exists && now - cacheData.data().lastFetched < ttlMs) {
-    const snapshot = await db.collection('cached_data').doc(key).collection(collection).get();
-    return snapshot.docs.map(doc => doc.data());
+    const snapshot = await db
+      .collection('cached_data')
+      .doc(key)
+      .collection(collection)
+      .get();
+    return snapshot.docs.map((doc) => doc.data());
   }
 
   const items = await fetchFn();
 
   const batch = db.batch();
-  items.forEach(item => {
-    const ref = db.collection('cached_data').doc(key).collection(collection).doc(item.invoice_id);
+  items.forEach((item) => {
+    const ref = db
+      .collection('cached_data')
+      .doc(key)
+      .collection(collection)
+      .doc(item.invoice_id);
     batch.set(ref, item, { merge: true });
   });
   batch.set(cacheDoc, { lastFetched: now });
