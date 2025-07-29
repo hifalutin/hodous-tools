@@ -19,8 +19,13 @@ const testInvoices = [
     balance: 0,
     reference_number: 'PO-0001',
     line_items: [
-      { name: 'Consulting', description: 'Consulting service', quantity: 5, rate: 200 }
-    ]
+      {
+        name: 'Consulting',
+        description: 'Consulting service',
+        quantity: 5,
+        rate: 200,
+      },
+    ],
   },
   {
     invoice_id: 'test-2',
@@ -33,9 +38,14 @@ const testInvoices = [
     balance: 800,
     reference_number: 'PO-0002',
     line_items: [
-      { name: 'Widget A', description: 'Standard widget', quantity: 3, rate: 300 },
-      { name: 'Support', description: 'Email support', quantity: 4, rate: 150 }
-    ]
+      {
+        name: 'Widget A',
+        description: 'Standard widget',
+        quantity: 3,
+        rate: 300,
+      },
+      { name: 'Support', description: 'Email support', quantity: 4, rate: 150 },
+    ],
   },
   {
     invoice_id: 'test-3',
@@ -47,7 +57,7 @@ const testInvoices = [
     total: 900,
     balance: 900,
     reference_number: 'PO-0003',
-    line_items: []
+    line_items: [],
   },
   {
     invoice_id: 'test-4',
@@ -60,9 +70,19 @@ const testInvoices = [
     balance: 0,
     reference_number: 'PO-0004',
     line_items: [
-      { name: 'Install', description: 'System installation', quantity: 2, rate: 1000 },
-      { name: 'Training', description: 'Onsite training', quantity: 3, rate: 500 }
-    ]
+      {
+        name: 'Install',
+        description: 'System installation',
+        quantity: 2,
+        rate: 1000,
+      },
+      {
+        name: 'Training',
+        description: 'Onsite training',
+        quantity: 3,
+        rate: 500,
+      },
+    ],
   },
   {
     invoice_id: 'test-5',
@@ -75,8 +95,13 @@ const testInvoices = [
     balance: 300,
     reference_number: 'PO-0005',
     line_items: [
-      { name: 'Maintenance', description: 'Annual maintenance', quantity: 1, rate: 1100 }
-    ]
+      {
+        name: 'Maintenance',
+        description: 'Annual maintenance',
+        quantity: 1,
+        rate: 1100,
+      },
+    ],
   },
   {
     invoice_id: 'test-6',
@@ -88,7 +113,7 @@ const testInvoices = [
     total: 500,
     balance: 500,
     reference_number: 'PO-0006',
-    line_items: []
+    line_items: [],
   },
   {
     invoice_id: 'test-7',
@@ -103,8 +128,13 @@ const testInvoices = [
     line_items: [
       { name: 'Software A', description: 'License', quantity: 2, rate: 800 },
       { name: 'Setup', description: 'Initial setup', quantity: 1, rate: 400 },
-      { name: 'Training', description: 'Remote training', quantity: 2, rate: 600 }
-    ]
+      {
+        name: 'Training',
+        description: 'Remote training',
+        quantity: 2,
+        rate: 600,
+      },
+    ],
   },
   {
     invoice_id: 'test-8',
@@ -117,8 +147,8 @@ const testInvoices = [
     balance: 0,
     reference_number: 'PO-0008',
     line_items: [
-      { name: 'Report', description: 'Annual report', quantity: 1, rate: 450 }
-    ]
+      { name: 'Report', description: 'Annual report', quantity: 1, rate: 450 },
+    ],
   },
   {
     invoice_id: 'test-9',
@@ -131,8 +161,13 @@ const testInvoices = [
     balance: 600,
     reference_number: 'PO-0009',
     line_items: [
-      { name: 'API Access', description: 'Monthly access', quantity: 2, rate: 300 }
-    ]
+      {
+        name: 'API Access',
+        description: 'Monthly access',
+        quantity: 2,
+        rate: 300,
+      },
+    ],
   },
   {
     invoice_id: 'test-10',
@@ -145,23 +180,32 @@ const testInvoices = [
     balance: 1500,
     reference_number: 'PO-0010',
     line_items: [
-      { name: 'Upgrade', description: 'System upgrade', quantity: 2, rate: 1000 }
-    ]
-  }
+      {
+        name: 'Upgrade',
+        description: 'System upgrade',
+        quantity: 2,
+        rate: 1000,
+      },
+    ],
+  },
 ];
 
-// Pagination: extract currentPage and limit from URL params
-const urlParams = new URLSearchParams(Astro.request.url.split('?')[1] || '');
-const currentPage = parseInt(urlParams.get('page') || '1', 10);
-const limit = parseInt(urlParams.get('per_page') || '10', 10);
+// Pagination: use static page and limit (no client pagination)
+const currentPage = 1;
+const limit = 1000;
 
 try {
-  // Skip API call for now, use test data
+  const res = await fetch(
+    `http://localhost:4321/api/getZohoInvoices`
+  );
+  if (!res.ok) throw new Error('Failed to fetch invoices');
+  const data = await res.json();
+  invoices = data.data.invoices || [];
+  isTestData = false;
+} catch (error) {
+  console.error('Failed to load invoices:', error);
   invoices = testInvoices;
   isTestData = true;
-} catch (error) {
-  console.error('Fallback to test data failed:', error);
-  invoices = [];
 }
 ---
 
@@ -172,9 +216,13 @@ try {
         <div class='px-6 py-4'>
           <PageHeader>Header</PageHeader>
           <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
-          {isTestData && (
-            <div class="text-yellow-400 text-sm italic mb-2">Showing test data</div>
-          )}
+          {
+            isTestData && (
+              <div class='text-yellow-400 text-sm italic mb-2'>
+                Showing test data
+              </div>
+            )
+          }
         </div>
         <table class='min-w-full'>
           <thead
@@ -385,33 +433,30 @@ try {
           <select
             name='limit'
             class='bg-neutral-800 text-white px-4 py-1.5 border-r border-neutral-700 focus:outline-none'
+            disabled
           >
-            {
-              [10, 25, 50, 100, 200].map((val) => (
-                <option value={val} selected={val === limit}>
-                  {val} per page
-                </option>
-              ))
-            }
+            <option value={limit} selected>{limit} per page</option>
           </select>
         </form>
         <button
           id='prev-btn'
           type='button'
-          class={`px-2 py-1.5 text-blue-500 hover:underline`}>&lsaquo;</button
-        >
+          class={`px-2 py-1.5 text-gray-500 pointer-events-none`}
+          disabled
+        >&lsaquo;</button>
         <span class='px-4 py-1.5 bg-neutral-900 border-x border-neutral-700'>
           {
             invoices.length > 0
-              ? `${(currentPage - 1) * limit + 1} - ${(currentPage - 1) * limit + invoices.length}`
+              ? `1 - ${invoices.length}`
               : 'No invoices'
           }
         </span>
         <button
           id='next-btn'
           type='button'
-          class={`px-2 py-1.5 text-blue-500 hover:underline`}>&rsaquo;</button
-        >
+          class={`px-2 py-1.5 text-gray-500 pointer-events-none`}
+          disabled
+        >&rsaquo;</button>
       </div>
     </div>
   </PageFooter>
@@ -419,7 +464,9 @@ try {
   <script type='module'>
     // Toggle invoice details row and fetch line items if needed
     function toggleInvoiceDetails(invoiceId) {
-      const detailsRow = document.querySelector(`tr[data-invoice-details-for="${invoiceId}"]`);
+      const detailsRow = document.querySelector(
+        `tr[data-invoice-details-for="${invoiceId}"]`
+      );
       if (!detailsRow) return;
 
       const isHidden = detailsRow.classList.contains('hidden');
@@ -435,10 +482,14 @@ try {
     // Fetch line items for a specific invoice and display them in the UI
     async function fetchLineItems(invoiceId) {
       // If test data, do not fetch
-      if (document.querySelector('body').innerText.includes('Showing test data')) {
-        const detailsRow = document.querySelector(`tr[data-invoice-details-for="${invoiceId}"]`);
+      if (
+        document.querySelector('body').innerText.includes('Showing test data')
+      ) {
+        const detailsRow = document.querySelector(
+          `tr[data-invoice-details-for="${invoiceId}"]`
+        );
         if (detailsRow) {
-          detailsRow.dataset.loaded = "true";
+          detailsRow.dataset.loaded = 'true';
         }
         return;
       }
@@ -449,7 +500,7 @@ try {
       if (!detailsRow) return;
       if (detailsRow.classList.contains('hidden')) {
         detailsRow.classList.remove('hidden');
-      } else if (detailsRow.dataset.loaded === "true") {
+      } else if (detailsRow.dataset.loaded === 'true') {
         detailsRow.classList.add('hidden');
         return;
       }
@@ -464,7 +515,9 @@ try {
         </div>
       `;
       try {
-        const response = await fetch(`/api/getZohoInvoiceLineItems?invoice_id=${invoiceId}`);
+        const response = await fetch(
+          `/api/getZohoInvoiceLineItems?invoice_id=${invoiceId}`
+        );
         const data = await response.json();
         const lineItems = data.line_items || [];
         let html = '';
@@ -532,48 +585,15 @@ try {
           html = `<div class="text-gray-500 italic">No line items.</div>`;
         }
         detailsRow.querySelector('td').innerHTML = html;
-        detailsRow.dataset.loaded = "true";
+        detailsRow.dataset.loaded = 'true';
       } catch (e) {
-        detailsRow.querySelector('td').innerHTML = '<span class="text-red-400">Failed to load line items.</span>';
+        detailsRow.querySelector('td').innerHTML =
+          '<span class="text-red-400">Failed to load line items.</span>';
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.querySelector('form#per-page-form');
-      const tableBody = document.querySelector('tbody');
-      const paginationDisplay = document.querySelector('span.px-4');
-      const prevBtn = document.getElementById('prev-btn');
-      const nextBtn = document.getElementById('next-btn');
       const selectAllCheckbox = document.getElementById('select-all');
-      let currentPage = parseInt(
-        document.querySelector('#current-page').value,
-        10
-      );
-      let limit = parseInt(document.querySelector('#limit').value, 10);
-      let hasMorePage = false;
-
-      function updatePaginationButtons() {
-        // Previous button
-        if (currentPage === 1) {
-          prevBtn.disabled = true;
-          prevBtn.classList.add('pointer-events-none', 'text-gray-500');
-          prevBtn.classList.remove('text-blue-500');
-        } else {
-          prevBtn.disabled = false;
-          prevBtn.classList.remove('pointer-events-none', 'text-gray-500');
-          prevBtn.classList.add('text-blue-500');
-        }
-        // Next button
-        if (!hasMorePage) {
-          nextBtn.disabled = true;
-          nextBtn.classList.add('pointer-events-none', 'text-gray-500');
-          nextBtn.classList.remove('text-blue-500');
-        } else {
-          nextBtn.disabled = false;
-          nextBtn.classList.remove('pointer-events-none', 'text-gray-500');
-          nextBtn.classList.add('text-blue-500');
-        }
-      }
 
       function attachRowCheckboxListeners() {
         const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
@@ -597,36 +617,24 @@ try {
         });
       });
 
-      form.addEventListener('change', async (e) => {
-        if (e.target.tagName === 'SELECT') {
-          limit = parseInt(e.target.value, 10);
-          currentPage = 1;
-          await fetchAndRenderInvoices(currentPage, limit);
-        }
-      });
+      // Pagination buttons are always disabled, but keep this for completeness
+      function updatePaginationButtons() {
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        prevBtn.classList.add('pointer-events-none', 'text-gray-500');
+        prevBtn.classList.remove('text-blue-500');
+        nextBtn.classList.add('pointer-events-none', 'text-gray-500');
+        nextBtn.classList.remove('text-blue-500');
+      }
 
-      prevBtn.addEventListener('click', async () => {
-        if (currentPage > 1) {
-          currentPage -= 1;
-          await fetchAndRenderInvoices(currentPage, limit);
-        }
-      });
-      nextBtn.addEventListener('click', async () => {
-        if (hasMorePage) {
-          currentPage += 1;
-          await fetchAndRenderInvoices(currentPage, limit);
-        }
-      });
-
-      // Initial state for buttons
-      hasMorePage =
-        document.querySelectorAll('tr[data-invoice-id]').length === limit;
       updatePaginationButtons();
       attachRowCheckboxListeners();
       updateSelectAllCheckbox();
 
       // Add click event listeners for invoice number cells
-      document.querySelectorAll('.toggle-invoice').forEach(el => {
+      document.querySelectorAll('.toggle-invoice').forEach((el) => {
         el.addEventListener('click', () => {
           const invoiceId = el.getAttribute('data-id');
           toggleInvoiceDetails(invoiceId);

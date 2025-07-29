@@ -1,10 +1,9 @@
 export const prerender = false;
 
 export async function GET({ url }) {
-  const query = new URLSearchParams(url.searchParams).toString();
   try {
     const response = await fetch(
-      `http://127.0.0.1:5001/hodous-tools/us-central1/getZohoInvoices?${query}`
+      'http://127.0.0.1:5001/hodous-tools/us-central1/getZohoInvoices'
     );
 
     if (!response.ok) {
