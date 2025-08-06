@@ -33,28 +33,28 @@ try {
           <table class='table-fixed min-w-full bg-neutral-900 divide-y divide-[#222222] text-sm text-left'>
               <thead class='bg-neutral-800 text-gray-100 text-left text-sm'>
                 <tr>
-                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>
+                  <th class="px-4 py-2 w-[30px] text-sm font-medium text-gray-300 whitespace-nowrap">
                     <input type='checkbox' class='form-checkbox text-blue-600' />
                   </th>
-                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>Project Name</th>
-                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 hidden sm:table-cell'>Rate</th>
-                  <th class='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 text-center'>Actions</th>
+                  <th class="px-4 py-2 text-sm font-medium text-gray-300 whitespace-nowrap">Project Name</th>
+                  <th class="px-4 py-2 text-sm font-medium text-gray-300 whitespace-nowrap hidden sm:table-cell">Rate</th>
+                  <th class="px-4 py-2 text-sm font-medium text-gray-300 text-center whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {projects.slice(0, 10).map((project) => (
                   <tr
-                    class='border-t border-[#222222] hover:bg-blue-800 transition-colors duration-200 cursor-pointer'
+                    class='border-t border-[#222222] hover:bg-blue-800 transition-colors duration-200 cursor-pointer align-middle'
                     data-project-id={project.project_id}
                   >
-                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
+                    <td class="px-4 py-3 text-sm text-gray-200 w-[30px] whitespace-nowrap">
                       <input type='checkbox' class='form-checkbox text-blue-600 row-checkbox' />
                     </td>
-                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>{project.project_name}</td>
-                    <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 hidden sm:table-cell'>
+                    <td class="px-4 py-3 text-sm text-gray-200 whitespace-nowrap">{project.project_name}</td>
+                    <td class="px-4 py-3 text-sm text-gray-200 whitespace-nowrap hidden sm:table-cell">
                       ${project.rate?.toFixed(2) || '0.00'}
                     </td>
-                    <td class='p-0 text-sm text-gray-200 h-full border-l border-[#222222] w-[40px]'>
+                    <td class="px-4 py-3 text-sm text-gray-200 text-center whitespace-nowrap w-[40px]">
                       <div class="flex justify-center items-center h-full w-full">
                         <div class="relative text-left h-full w-full">
                           <button

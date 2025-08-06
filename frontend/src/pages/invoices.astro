@@ -2,216 +2,93 @@
 import Layout from '../layouts/Layout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import PageFooter from '../components/PageFooter.astro';
+import DataTable from '../components/DataTable/DataTable.jsx';
+
+const tableInfo = {
+  headers: [
+    {
+      key: 'select',
+      label: 'Select',
+      headerAlign: 'center',
+      columnAlign: 'center',
+    },
+    {
+      key: 'invoice_number',
+      label: 'Invoice #',
+      headerAlign: 'left',
+      columnAlign: 'left',
+    },
+    {
+      key: 'cf_customer_name',
+      label: 'Customer Name',
+      headerAlign: 'left',
+      columnAlign: 'left',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      headerAlign: 'center',
+      columnAlign: 'center',
+    },
+    {
+      key: 'due_date',
+      label: 'Due Date',
+      headerAlign: 'center',
+      columnAlign: 'center',
+    },
+    {
+      key: 'total',
+      label: 'Invoice Amt',
+      headerAlign: 'center',
+      columnAlign: 'center',
+    },
+    {
+      key: 'balance',
+      label: 'Balance',
+      headerAlign: 'center',
+      columnAlign: 'center',
+    },
+    {
+      key: 'reference_number',
+      label: 'Details',
+      headerAlign: 'left',
+      columnAlign: 'left',
+    },
+  ],
+  highlightFields: ['invoice_number'],
+  apiUrl: 'http://localhost:4321/api/getZohoInvoices',
+  isSelectable: true,
+  hasActions: true,
+  dateFormat: 'MMM d, yyyy',
+  dateFields: ['due_date'],
+  highlightedFields: ['invoice_number'],
+  actionMenuItems: [
+    {
+      item: 'Delete',
+      url: 'http://www.yahoo.com',
+      warningMessage: 'Are you sure you want to delete this invoice?',
+    },
+  ],
+};
 
 let invoices = [];
 let isTestData = false;
 
-// Test data block
-const testInvoices = [
-  {
-    invoice_id: 'test-1',
-    invoice_number: 'INV-001',
-    cf_customer_name: 'Alpha Corp',
-    date: '2025-07-01',
-    status: 'Paid',
-    due_date: '2025-07-10',
-    total: 1500,
-    balance: 0,
-    reference_number: 'PO-0001',
-    line_items: [
-      {
-        name: 'Consulting',
-        description: 'Consulting service',
-        quantity: 5,
-        rate: 200,
-      },
-    ],
-  },
-  {
-    invoice_id: 'test-2',
-    invoice_number: 'INV-002',
-    cf_customer_name: 'Beta LLC',
-    date: '2025-07-02',
-    status: 'Sent',
-    due_date: '2025-07-15',
-    total: 2400,
-    balance: 800,
-    reference_number: 'PO-0002',
-    line_items: [
-      {
-        name: 'Widget A',
-        description: 'Standard widget',
-        quantity: 3,
-        rate: 300,
-      },
-      { name: 'Support', description: 'Email support', quantity: 4, rate: 150 },
-    ],
-  },
-  {
-    invoice_id: 'test-3',
-    invoice_number: 'INV-003',
-    cf_customer_name: 'Gamma Inc',
-    date: '2025-07-03',
-    status: 'Draft',
-    due_date: '2025-07-20',
-    total: 900,
-    balance: 900,
-    reference_number: 'PO-0003',
-    line_items: [],
-  },
-  {
-    invoice_id: 'test-4',
-    invoice_number: 'INV-004',
-    cf_customer_name: 'Delta Enterprises',
-    date: '2025-07-04',
-    status: 'Paid',
-    due_date: '2025-07-25',
-    total: 3500,
-    balance: 0,
-    reference_number: 'PO-0004',
-    line_items: [
-      {
-        name: 'Install',
-        description: 'System installation',
-        quantity: 2,
-        rate: 1000,
-      },
-      {
-        name: 'Training',
-        description: 'Onsite training',
-        quantity: 3,
-        rate: 500,
-      },
-    ],
-  },
-  {
-    invoice_id: 'test-5',
-    invoice_number: 'INV-005',
-    cf_customer_name: 'Epsilon Co.',
-    date: '2025-07-05',
-    status: 'Sent',
-    due_date: '2025-07-30',
-    total: 1100,
-    balance: 300,
-    reference_number: 'PO-0005',
-    line_items: [
-      {
-        name: 'Maintenance',
-        description: 'Annual maintenance',
-        quantity: 1,
-        rate: 1100,
-      },
-    ],
-  },
-  {
-    invoice_id: 'test-6',
-    invoice_number: 'INV-006',
-    cf_customer_name: 'Zeta Group',
-    date: '2025-07-06',
-    status: 'Draft',
-    due_date: '2025-08-01',
-    total: 500,
-    balance: 500,
-    reference_number: 'PO-0006',
-    line_items: [],
-  },
-  {
-    invoice_id: 'test-7',
-    invoice_number: 'INV-007',
-    cf_customer_name: 'Eta Solutions',
-    date: '2025-07-07',
-    status: 'Sent',
-    due_date: '2025-08-05',
-    total: 3200,
-    balance: 1200,
-    reference_number: 'PO-0007',
-    line_items: [
-      { name: 'Software A', description: 'License', quantity: 2, rate: 800 },
-      { name: 'Setup', description: 'Initial setup', quantity: 1, rate: 400 },
-      {
-        name: 'Training',
-        description: 'Remote training',
-        quantity: 2,
-        rate: 600,
-      },
-    ],
-  },
-  {
-    invoice_id: 'test-8',
-    invoice_number: 'INV-008',
-    cf_customer_name: 'Theta Ltd',
-    date: '2025-07-08',
-    status: 'Paid',
-    due_date: '2025-08-10',
-    total: 450,
-    balance: 0,
-    reference_number: 'PO-0008',
-    line_items: [
-      { name: 'Report', description: 'Annual report', quantity: 1, rate: 450 },
-    ],
-  },
-  {
-    invoice_id: 'test-9',
-    invoice_number: 'INV-009',
-    cf_customer_name: 'Iota Systems',
-    date: '2025-07-09',
-    status: 'Sent',
-    due_date: '2025-08-12',
-    total: 600,
-    balance: 600,
-    reference_number: 'PO-0009',
-    line_items: [
-      {
-        name: 'API Access',
-        description: 'Monthly access',
-        quantity: 2,
-        rate: 300,
-      },
-    ],
-  },
-  {
-    invoice_id: 'test-10',
-    invoice_number: 'INV-010',
-    cf_customer_name: 'Kappa Services',
-    date: '2025-07-10',
-    status: 'Sent',
-    due_date: '2025-08-15',
-    total: 2000,
-    balance: 1500,
-    reference_number: 'PO-0010',
-    line_items: [
-      {
-        name: 'Upgrade',
-        description: 'System upgrade',
-        quantity: 2,
-        rate: 1000,
-      },
-    ],
-  },
-];
-
-// Pagination: use static page and limit (no client pagination)
-const currentPage = 1;
-const limit = 1000;
-
 try {
-  const res = await fetch(
-    `http://localhost:4321/api/getZohoInvoices`
-  );
+  const res = await fetch('http://localhost:4321/api/getZohoInvoices');
   if (!res.ok) throw new Error('Failed to fetch invoices');
   const data = await res.json();
   invoices = data.data.invoices || [];
   isTestData = false;
 } catch (error) {
   console.error('Failed to load invoices:', error);
-  invoices = testInvoices;
-  isTestData = true;
+  invoices = [];
 }
 ---
 
 <Layout>
   <div class='flex flex-col min-h-screen bg-neutral-900'>
-    <div class='flex-1 overflow-auto px-4 pb-[60px] container mx-auto'>
+    <div class='flex-1 overflow-auto'>
       <div class='overflow-x-auto w-full'>
         <div class='px-6 py-4'>
           <PageHeader>Header</PageHeader>
@@ -224,242 +101,11 @@ try {
             )
           }
         </div>
-        <table class='min-w-full'>
-          <thead
-            class='bg-neutral-800 text-gray-300 sticky top-0 z-20 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]'
-          >
-            <tr>
-              <th class='px-6 py-3 text-left text-sm uppercase tracking-wider'>
-                <input
-                  type='checkbox'
-                  id='select-all'
-                  class='form-checkbox text-blue-600'
-                />
-              </th>
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Invoice #</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer w-auto'
-                >Customer Name</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Date</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Status</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Due Date</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Invoice Amt</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Balance</th
-              >
-              <th
-                class='px-6 py-3 text-left text-sm uppercase tracking-wider cursor-pointer'
-                >Order #</th
-              >
-              <th class='px-6 py-3 text-left text-sm uppercase tracking-wider'
-                >Actions</th
-              >
-            </tr>
-          </thead>
-          <tbody class='bg-neutral-900'>
-            {
-              invoices.length > 0 ? (
-                invoices.map((invoice) => (
-                  <>
-                    <tr
-                      class='hover:bg-blue-700 transition-colors duration-200 cursor-pointer'
-                      data-invoice-id={invoice.invoice_id}
-                    >
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200'>
-                        <input
-                          type='checkbox'
-                          class='form-checkbox text-blue-600 row-checkbox'
-                        />
-                      </td>
-                      <td
-                        class='px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:underline cursor-pointer toggle-invoice'
-                        data-id={invoice.invoice_id}
-                      >
-                        {invoice.invoice_number}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 max-w-xs truncate'>
-                        {invoice.cf_customer_name}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                        {invoice.date || '—'}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-green-400'>
-                        {invoice.status}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                        {invoice.due_date}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                        ${Number(invoice.total || 0).toFixed(2)}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-center text-gray-200'>
-                        ${Number(invoice.balance || 0).toFixed(2)}
-                      </td>
-                      <td class='px-6 py-4 whitespace-normal text-sm text-gray-200'>
-                        {invoice.reference_number || '—'}
-                      </td>
-                      <td class='px-6 py-4 whitespace-nowrap text-sm text-gray-200 text-center'>
-                        <div class='relative inline-block text-left'>
-                          <button
-                            class='text-gray-400 hover:text-white focus:outline-none'
-                            aria-label='Open actions'
-                          >
-                            &#8942;
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr
-                      class='hidden bg-neutral-800'
-                      data-invoice-details-for={invoice.invoice_id}
-                    >
-                      <td colSpan='10' class='px-6 py-4 text-sm text-gray-300'>
-                        {Array.isArray(invoice.line_items) &&
-                        invoice.line_items.length > 0 ? (
-                          <table class='w-full text-xs'>
-                            <thead>
-                              <tr class='text-sm uppercase text-gray-400 bg-neutral-800'>
-                                <th class='px-3 py-2 text-left'>Description</th>
-                                <th class='px-3 py-2 text-right'>Quantity</th>
-                                <th class='px-3 py-2 text-right'>Price</th>
-                                <th class='px-3 py-2 text-right'>Total</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {invoice.line_items.map((item) => (
-                                <tr key={item.item_id || item.description}>
-                                  <td class='px-3 py-1 text-gray-300'>
-                                    {item.name || item.description || '—'}
-                                  </td>
-                                  <td class='px-3 py-1 text-right text-gray-400'>
-                                    {item.quantity ?? '—'}
-                                  </td>
-                                  <td class='px-3 py-1 text-right text-gray-400'>
-                                    $
-                                    {Number(
-                                      item.rate || item.price || 0
-                                    ).toFixed(2)}
-                                  </td>
-                                  <td class='px-3 py-1 text-right text-gray-200'>
-                                    $
-                                    {Number(
-                                      (typeof item.quantity === 'number'
-                                        ? item.quantity
-                                        : parseFloat(item.quantity || 0)) *
-                                        (typeof item.rate === 'number'
-                                          ? item.rate
-                                          : parseFloat(
-                                              item.rate || item.price || 0
-                                            ))
-                                    ).toFixed(2)}
-                                  </td>
-                                </tr>
-                              ))}
-                              <tr>
-                                <td
-                                  class='px-3 py-2 text-right text-gray-300'
-                                  colSpan='3'
-                                >
-                                  Total:
-                                </td>
-                                <td class='px-3 py-2 text-right text-gray-100'>
-                                  $
-                                  {invoice.line_items
-                                    .reduce(
-                                      (sum, item) =>
-                                        sum +
-                                        (typeof item.quantity === 'number'
-                                          ? item.quantity
-                                          : parseFloat(item.quantity || 0)) *
-                                          (typeof item.rate === 'number'
-                                            ? item.rate
-                                            : parseFloat(
-                                                item.rate || item.price || 0
-                                              )),
-                                      0
-                                    )
-                                    .toFixed(2)}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        ) : (
-                          <div class='text-gray-500 italic'>No line items.</div>
-                        )}
-                      </td>
-                    </tr>
-                  </>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan='10' class='px-6 py-4 text-center text-gray-400'>
-                    No invoices found.
-                  </td>
-                </tr>
-              )
-            }
-          </tbody>
-        </table>
+        <DataTable client:load tableInfo={tableInfo} data={invoices} />
       </div>
     </div>
   </div>
-  <input type='hidden' id='current-page' value={currentPage} />
-  <input type='hidden' id='limit' value={limit} />
-  <PageFooter>
-    <div
-      class='fixed bottom-0 left-0 w-full z-20 h-[50px] bg-neutral-900 text-white flex items-center justify-center border-t border-neutral-700'
-    >
-      <div
-        class='flex items-center rounded border border-neutral-700 overflow-hidden text-white text-sm bg-neutral-900 shadow-lg'
-      >
-        <form id='per-page-form'>
-          <select
-            name='limit'
-            class='bg-neutral-800 text-white px-4 py-1.5 border-r border-neutral-700 focus:outline-none'
-            disabled
-          >
-            <option value={limit} selected>{limit} per page</option>
-          </select>
-        </form>
-        <button
-          id='prev-btn'
-          type='button'
-          class={`px-2 py-1.5 text-gray-500 pointer-events-none`}
-          disabled
-        >&lsaquo;</button>
-        <span class='px-4 py-1.5 bg-neutral-900 border-x border-neutral-700'>
-          {
-            invoices.length > 0
-              ? `1 - ${invoices.length}`
-              : 'No invoices'
-          }
-        </span>
-        <button
-          id='next-btn'
-          type='button'
-          class={`px-2 py-1.5 text-gray-500 pointer-events-none`}
-          disabled
-        >&rsaquo;</button>
-      </div>
-    </div>
-  </PageFooter>
+  <PageFooter />
 
   <script type='module'>
     // Toggle invoice details row and fetch line items if needed
@@ -617,19 +263,6 @@ try {
         });
       });
 
-      // Pagination buttons are always disabled, but keep this for completeness
-      function updatePaginationButtons() {
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        prevBtn.classList.add('pointer-events-none', 'text-gray-500');
-        prevBtn.classList.remove('text-blue-500');
-        nextBtn.classList.add('pointer-events-none', 'text-gray-500');
-        nextBtn.classList.remove('text-blue-500');
-      }
-
-      updatePaginationButtons();
       attachRowCheckboxListeners();
       updateSelectAllCheckbox();
 

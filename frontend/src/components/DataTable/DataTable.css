@@ -1,0 +1,81 @@
+.data-table {
+  min-width: 100%;
+  table-layout: auto;
+  font-size: 0.875rem; /* text-sm */
+  text-align: left;
+  color: white;
+}
+
+.data-table th,
+.data-table td {
+  width: 1%;
+  white-space: normal;
+  max-width: 200px;
+  padding: 0.75rem 0.75rem;
+  word-wrap: break-word;
+}
+
+.data-table .order-column {
+  width: 100%;
+  white-space: normal;
+}
+
+.data-table-header {
+  background-color: #404040; /* Tailwind neutral-700 */
+  color: white;
+  padding: 1.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table-cell {
+  line-height: 1.5;
+}
+
+.data-table-cell-numeric {
+  text-align: right;
+  line-height: 1.5;
+}
+
+.data-table-row {
+  transition-property: background-color;
+  transition-duration: 200ms;
+  cursor: pointer;
+  vertical-align: middle;
+  height: 3.5rem; /* Increased row height */
+  line-height: 1.75; /* Slightly increased line height */
+  border-bottom: 1px solid #1a1a1a; /* neutral-900 */
+}
+.data-table-row:hover {
+  background-color: rgba(30, 58, 138, 0.02) !important; /* very subtle blue hover */
+  cursor: pointer;
+}
+.data-table-row:nth-child(even) {
+  background-color: #111111; /* neutral-900 */
+}
+.data-table-row:nth-child(odd) {
+  background-color: #121212; /* neutral-800 */
+}
+
+.data-table-header-row {
+  border-bottom: 1px solid #1a1a1a; /* neutral-900 */
+}
+
+.data-table td input[type="checkbox"],
+.data-table th input[type="checkbox"] {
+  display: block;
+  margin: 0 auto;
+}
+
+.data-table-cell-status-paid {
+  color: #4ade80; /* Tailwind green-400 */
+}
+
+.data-table-cell-status-unpaid {
+  color: #fb923c; /* Tailwind orange-400 */
+}
+
+a{
+   @apply text-blue-400 hover:text-blue-300 font-medium;
+}
