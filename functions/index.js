@@ -29,6 +29,8 @@ const db = admin.firestore();
 
 dotenv.config();
 
+const API = (process.env.ZOHO_API_DOMAIN || 'https://www.zohoapis.com').replace(/\/$/, '');
+
 const org_id = process.env.ZOHO_ORG_ID;
 setGlobalOptions({ maxInstances: 10 });
 
@@ -37,7 +39,7 @@ export const getZohoContacts = onRequest(
   async (req, res) => {
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/contacts?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/contacts?organization_id=${org_id}`;
         const response = await axios.get(endpoint, {
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -45,7 +47,7 @@ export const getZohoContacts = onRequest(
         });
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/contacts`,
+          endpoint: `${API}/books/v3/contacts`,
           status: response.status,
           headers: response.headers,
         });
@@ -67,7 +69,7 @@ export const getZohoCustomers = onRequest(
   async (req, res) => {
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/customers?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/customers?organization_id=${org_id}`;
         const response = await axios.get(endpoint, {
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -75,7 +77,7 @@ export const getZohoCustomers = onRequest(
         });
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/customers`,
+          endpoint: `${API}/books/v3/customers`,
           status: response.status,
           headers: response.headers,
         });
@@ -97,7 +99,7 @@ export const getZohoProjects = onRequest(
   async (req, res) => {
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/projects?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/projects?organization_id=${org_id}`;
         const response = await axios.get(endpoint, {
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -105,7 +107,7 @@ export const getZohoProjects = onRequest(
         });
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/projects`,
+          endpoint: `${API}/books/v3/projects`,
           status: response.status,
           headers: response.headers,
         });
@@ -136,7 +138,7 @@ export const createZohoProject = onRequest(
 
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/projects?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/projects?organization_id=${org_id}`;
         const response = await axios.post(
           endpoint,
           {
@@ -154,7 +156,7 @@ export const createZohoProject = onRequest(
         );
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/projects`,
+          endpoint: `${API}/books/v3/projects`,
           status: response.status,
           headers: response.headers,
         });
@@ -184,7 +186,7 @@ export const deleteZohoProject = onRequest(
 
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/projects/${project_id}?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/projects/${project_id}?organization_id=${org_id}`;
         const response = await axios.delete(endpoint, {
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -192,7 +194,7 @@ export const deleteZohoProject = onRequest(
         });
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/projects/${project_id}`,
+          endpoint: `${API}/books/v3/projects/${project_id}`,
           status: response.status,
           headers: response.headers,
         });
@@ -213,13 +215,13 @@ export const getZohoInvoices = onRequest(
   async (req, res) => {
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/invoices?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/invoices?organization_id=${org_id}`;
         const response = await axios.get(endpoint, {
           headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
         });
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/invoices`,
+          endpoint: `${API}/books/v3/invoices`,
           status: response.status,
           headers: response.headers,
         });
@@ -248,7 +250,7 @@ export const getZohoInvoiceLineItems = onRequest(
 
     try {
       const data = await handleZohoRequestWithRetry(async (accessToken) => {
-        const endpoint = `https://www.zohoapis.com/books/v3/invoices/${invoice_id}?organization_id=${org_id}`;
+        const endpoint = `${API}/books/v3/invoices/${invoice_id}?organization_id=${org_id}`;
         const response = await axios.get(endpoint, {
           headers: {
             Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -256,7 +258,7 @@ export const getZohoInvoiceLineItems = onRequest(
         });
         await logApiCall({
           api: 'zoho',
-          endpoint: `https://www.zohoapis.com/books/v3/invoices/${invoice_id}`,
+          endpoint: `${API}/books/v3/invoices/${invoice_id}`,
           status: response.status,
           headers: response.headers,
         });
