@@ -24,6 +24,7 @@
     "alpinejs": "^3.14.9",
     "date-fns": "^4.1.0",
     "lucide": "^0.525.0",
+    "lucide-react": "^0.536.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   }

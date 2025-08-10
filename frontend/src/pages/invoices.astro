@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PageHeader from '../components/PageHeader.astro';
-import PageFooter from '../components/PageFooter.astro';
 import DataTable from '../components/DataTable/DataTable.jsx';
 
 const tableInfo = {
@@ -39,14 +38,14 @@ const tableInfo = {
     {
       key: 'total',
       label: 'Invoice Amt',
-      headerAlign: 'center',
-      columnAlign: 'center',
+      headerAlign: 'right',
+      columnAlign: 'right',
     },
     {
       key: 'balance',
       label: 'Balance',
-      headerAlign: 'center',
-      columnAlign: 'center',
+      headerAlign: 'left',
+      columnAlign: 'left',
     },
     {
       key: 'reference_number',
@@ -62,6 +61,7 @@ const tableInfo = {
   dateFormat: 'MMM d, yyyy',
   dateFields: ['due_date'],
   highlightedFields: ['invoice_number'],
+  financialFields: ['total', 'balance'],
   actionMenuItems: [
     {
       item: 'Delete',
@@ -70,215 +70,12 @@ const tableInfo = {
     },
   ],
 };
-
-let invoices = [];
-let isTestData = false;
-
-try {
-  const res = await fetch('http://localhost:4321/api/getZohoInvoices');
-  if (!res.ok) throw new Error('Failed to fetch invoices');
-  const data = await res.json();
-  invoices = data.data.invoices || [];
-  isTestData = false;
-} catch (error) {
-  console.error('Failed to load invoices:', error);
-  invoices = [];
-}
 ---
 
 <Layout>
-  <div class='flex flex-col min-h-screen bg-neutral-900'>
-    <div class='flex-1 overflow-auto'>
-      <div class='overflow-x-auto w-full'>
-        <div class='px-6 py-4'>
-          <PageHeader>Header</PageHeader>
-          <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
-          {
-            isTestData && (
-              <div class='text-yellow-400 text-sm italic mb-2'>
-                Showing test data
-              </div>
-            )
-          }
-        </div>
-        <DataTable client:load tableInfo={tableInfo} data={invoices} />
-      </div>
-    </div>
+  <div class='px-6 py-4'>
+    <PageHeader>Header</PageHeader>
+    <h1 class='text-3xl font-bold mb-2'>Invoices</h1>
   </div>
-  <PageFooter />
-
-  <script type='module'>
-    // Toggle invoice details row and fetch line items if needed
-    function toggleInvoiceDetails(invoiceId) {
-      const detailsRow = document.querySelector(
-        `tr[data-invoice-details-for="${invoiceId}"]`
-      );
-      if (!detailsRow) return;
-
-      const isHidden = detailsRow.classList.contains('hidden');
-      if (isHidden) {
-        detailsRow.classList.remove('hidden');
-        if (!detailsRow.dataset.loaded) {
-          fetchLineItems(invoiceId);
-        }
-      } else {
-        detailsRow.classList.add('hidden');
-      }
-    }
-    // Fetch line items for a specific invoice and display them in the UI
-    async function fetchLineItems(invoiceId) {
-      // If test data, do not fetch
-      if (
-        document.querySelector('body').innerText.includes('Showing test data')
-      ) {
-        const detailsRow = document.querySelector(
-          `tr[data-invoice-details-for="${invoiceId}"]`
-        );
-        if (detailsRow) {
-          detailsRow.dataset.loaded = 'true';
-        }
-        return;
-      }
-      // Find the details row for this invoice
-      const detailsRow = document.querySelector(
-        `tr[data-invoice-details-for="${invoiceId}"]`
-      );
-      if (!detailsRow) return;
-      if (detailsRow.classList.contains('hidden')) {
-        detailsRow.classList.remove('hidden');
-      } else if (detailsRow.dataset.loaded === 'true') {
-        detailsRow.classList.add('hidden');
-        return;
-      }
-      // Show loading
-      detailsRow.querySelector('td').innerHTML = `
-        <div class="flex items-center justify-center py-4">
-          <svg class="animate-spin h-5 w-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-          </svg>
-          <span class="text-gray-400">Loading line items...</span>
-        </div>
-      `;
-      try {
-        const response = await fetch(
-          `/api/getZohoInvoiceLineItems?invoice_id=${invoiceId}`
-        );
-        const data = await response.json();
-        const lineItems = data.line_items || [];
-        let html = '';
-        if (Array.isArray(lineItems) && lineItems.length > 0) {
-          const itemsRows = lineItems
-            .map(
-              (item) => `
-                <tr>
-                  <td class="px-3 py-1 text-gray-300">
-                    ${item.name || item.description || '—'}
-                  </td>
-                  <td class="px-3 py-1 text-right text-gray-400">
-                    ${item.quantity ?? '—'}
-                  </td>
-                  <td class="px-3 py-1 text-right text-gray-400">
-                    $${Number(item.rate ?? item.price ?? 0).toFixed(2)}
-                  </td>
-                  <td class="px-3 py-1 text-right text-gray-200">
-                    $${(
-                      (typeof item.quantity === 'number'
-                        ? item.quantity
-                        : parseFloat(item.quantity || 0)) *
-                      (typeof item.rate === 'number'
-                        ? item.rate
-                        : parseFloat(item.rate || item.price || 0))
-                    ).toFixed(2)}
-                  </td>
-                </tr>
-              `
-            )
-            .join('');
-          const total = lineItems
-            .reduce(
-              (sum, item) =>
-                sum +
-                (typeof item.quantity === 'number'
-                  ? item.quantity
-                  : parseFloat(item.quantity || 0)) *
-                  (typeof item.rate === 'number'
-                    ? item.rate
-                    : parseFloat(item.rate || item.price || 0)),
-              0
-            )
-            .toFixed(2);
-          html = `
-            <table class="w-full text-xs">
-              <thead>
-                <tr class="text-sm uppercase text-gray-400 bg-neutral-800">
-                  <th class="px-3 py-2 text-left">Description</th>
-                  <th class="px-3 py-2 text-right">Quantity</th>
-                  <th class="px-3 py-2 text-right">Price</th>
-                  <th class="px-3 py-2 text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsRows}
-                <tr>
-                  <td class="px-3 py-2 text-right text-gray-300" colspan="3">Total:</td>
-                  <td class="px-3 py-2 text-right text-gray-100">$${total}</td>
-                </tr>
-              </tbody>
-            </table>
-          `;
-        } else {
-          html = `<div class="text-gray-500 italic">No line items.</div>`;
-        }
-        detailsRow.querySelector('td').innerHTML = html;
-        detailsRow.dataset.loaded = 'true';
-      } catch (e) {
-        detailsRow.querySelector('td').innerHTML =
-          '<span class="text-red-400">Failed to load line items.</span>';
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const selectAllCheckbox = document.getElementById('select-all');
-
-      function attachRowCheckboxListeners() {
-        const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
-        rowCheckboxes.forEach((checkbox) => {
-          checkbox.addEventListener('change', updateSelectAllCheckbox);
-        });
-      }
-
-      function updateSelectAllCheckbox() {
-        const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
-        const allChecked = Array.from(rowCheckboxes).every((cb) => cb.checked);
-        selectAllCheckbox.checked = allChecked && rowCheckboxes.length > 0;
-        const someChecked = Array.from(rowCheckboxes).some((cb) => cb.checked);
-        selectAllCheckbox.indeterminate = !allChecked && someChecked;
-      }
-
-      selectAllCheckbox.addEventListener('change', () => {
-        const rowCheckboxes = document.querySelectorAll('input.row-checkbox');
-        rowCheckboxes.forEach((cb) => {
-          cb.checked = selectAllCheckbox.checked;
-        });
-      });
-
-      attachRowCheckboxListeners();
-      updateSelectAllCheckbox();
-
-      // Add click event listeners for invoice number cells
-      document.querySelectorAll('.toggle-invoice').forEach((el) => {
-        el.addEventListener('click', () => {
-          const invoiceId = el.getAttribute('data-id');
-          toggleInvoiceDetails(invoiceId);
-        });
-      });
-    });
-  </script>
+  <DataTable client:load tableInfo={tableInfo} />
 </Layout>
-
-<style>
-  .bg-blue-800 {
-    background-color: #1e40af; /* or a darker blue that matches your theme */
-  }
-</style>
